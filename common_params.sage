@@ -1,3 +1,7 @@
+"""
+This file contains default constants and parameters an L2 object refers to.
+"""
+
 import pickle
 from time import perf_counter
 from fpylll import *

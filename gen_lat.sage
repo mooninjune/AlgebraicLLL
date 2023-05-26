@@ -1,3 +1,14 @@
+"""
+This file implements construction for several lattices.
+Namely, it can generate:
+    ○ Unimodular matrtices;
+    ○ U*B*W matrix for unimodular U and W;
+    ○ NTRU lattices with ternary secret;
+    ○ LWE matrices;
+    ○ Kannan-like mattrices;
+    ○ ModFalcon (ModNTRU) lattices.
+"""
+
 from sage.stats.distributions.discrete_gaussian_integer import DiscreteGaussianDistributionIntegerSampler
 
 def gen_unimod_matrix_fast( K,n, sigma=0.75, density=0.2 ):

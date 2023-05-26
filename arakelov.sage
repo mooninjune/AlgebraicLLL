@@ -1,3 +1,10 @@
+"""
+This is an implementation of Arakelov random walks described in:
+[dBDPMW20] - oen de Boer, L´eo Ducas, Alice Pellet-Mary, and Benjamin Wesolowski.
+Random self-reducibility of ideal-SVP via Arakelov random walks. In
+Advances in Cryptology - CRYPTO 2020, pages 243–273, 2020
+"""
+
 #import sys, os, time
 import sage.misc.randstate as randstate
 

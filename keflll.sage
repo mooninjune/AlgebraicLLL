@@ -1,3 +1,12 @@
+"""
+Utils implemented from developing the ideas of Kirshner, Espitau and Fouque.
+This file implements:
+    ○ Ascending / Descending;
+    ○ Log embedding;
+    ○ Log unit lattice decoding;
+    ○ Efficient Bezout equation solver.
+"""
+
 from sage.all_cmdline import *   # import sage library
 
 import time

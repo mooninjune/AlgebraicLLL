@@ -1,3 +1,10 @@
+"""
+Main file. Contains class L2, which implements LLL algorithm.
+Also contains function generate_FieldInfos that precomputes the Log-unit
+lattices (LUL) for various fields.
+To precompute LUL for fields of conductor up to 2**11 run generate_FieldInfos( 11 ).    
+"""
+
 from keflll_wrapper import ascend, descend, BezTransform
 from time import perf_counter
 from utils import minkowski_embedding, inv_minkowski_embedding, svp_coeff, canonical_embedding_for_fpylll, embed_Q, enorm_vector_over_numfield, enorm_numfield

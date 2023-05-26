@@ -2,6 +2,8 @@
            AN ALGORITHM FOR FINDING A SHORT GENERATOR IN Q(\ZETA_512)
                    IMPLEMENTED BY ALEXANDRE GÉLIN - LIP6/UPMC
 *******************************************************************************/
+\\ This code has been taken from (https://alexgelin.fr/index_en.html) 
+
 
 \\build a random element in nf with coefficients in [-mcoeff..mcoeff]
 nfrandom(mcoeff,nf)={

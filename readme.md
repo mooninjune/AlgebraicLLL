@@ -25,8 +25,14 @@ fr/index_en.html)
  - `arakelov.sage` - implementation of Arakelov random walk from [dBDPMW20]
  - `lllbkz_modfalcon.sage, lllbkz_ntru.sage` - fpylll reduction for NTRU and ModFalcon.
 
-[BEF+17]
-[dBDPMW20]
+[BEF+17] - Jean-Fran¸cois Biasse, Thomas Espitau, Pierre-Alain Fouque, Alexandre
+G´elin, and Paul Kirchner. Computing generator in cyclotomic integer
+rings: A subfield algorithm for the principal ideal problem in and appli-
+cation to the cryptanalysis of a FHE scheme. In Advances in Cryptology–
+EUROCRYPT 2017, pages 60–88, 2017
+[dBDPMW20] - oen de Boer, L´eo Ducas, Alice Pellet-Mary, and Benjamin Wesolowski.
+Random self-reducibility of ideal-SVP via Arakelov random walks. In
+Advances in Cryptology - CRYPTO 2020, pages 243–273, 2020
 
 # How to use
 Run `build.sh` in the downloaded directory. This will build all necessary files.
