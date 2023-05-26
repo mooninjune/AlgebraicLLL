@@ -1,10 +1,9 @@
-# Practical Algebraic LLL Reduction Algorithm For Free Modules
+# Practical Algebraic LLL Reduction Algorithm For Free Modules over Cyclotomic Fields of Power-of-two Conductor
 
 This repository contains the framework that reduces algebraic lattices defined over power-of-2 cyclotomic fields. It contains the implementation of an algebraic LLL algorithm described in the article "**Practical Algebraic LLL for Free Modules over Cyclotomic Fields of Power-of-two Conductor**".
 
 # Requirements
 
- - Unix-like OS
  - [SageMath 9.8+](https://www.sagemath.org/)
  - Optionally install `multiprocess` by running `pip install multiprocess` in sage session.
  - Optionally update the FPYLLL in sage so that it supports qd. See: **Manual update of fpylll and fplll inside Sagemath 9.0+** in  [fpylll](https://github.com/fplll/fpylll).
@@ -14,23 +13,28 @@ The repository consists of the following files:
  - `common_params.sage` - file that stores defaul values for various constants used by the algebraic LLL algorithm.
  - `LLL_params.sage` - file that encompass strategies algebraic LLL acts according to.
  - `gen_lat.sage` - file that generates algebraic lattices of particular interest.
- - `GenRec.gp, GentrySzydlo.gp` - files with code that solves the Principal Ideal Problem.
- - `f64bnf.pkl, f128bnf.pkl` - precomputed bnfinit for 64-th and 128-th cyclotomic fields.
+ - `GenRec.gp, GentrySzydlo.gp` - files with code that solves the Principal Ideal Problem from [BEF+17](https://alexgelin.
+fr/index_en.html)
+ - `f64bnf.pkl, f128bnf.pkl` - precomputed bnfinit using [PariGP](https://pari.math.u-bordeaux.fr/) for 64-th and 128-th cyclotomic fields.
  - `Field_infos.pkl` precomputed Log-unit lattices for some fields.
- - `keflll.sage` - functions implementing ascending, descending and a vector insertion.
+ - `keflll.sage` - functions implementing ascending, descending and vector insertion.
  - `util_l2.sage` - implementation of fast arithmetic over number fields, fast linear algebra, size- and unit- reduction and Log-unit computations.
  - `utils.sage` - contains helping functions.
  - `svp_tools.sage` - SVP oracle and PIP interface.
  - `profile_tests.sage, ntru_experiments.sage, modfalcon_experiments.sage` - the experiments.
- - `arakelov.sage` - implementation of Arakelov random walks.
+ - `arakelov.sage` - implementation of Arakelov random walk from [dBDPMW20]
  - `lllbkz_modfalcon.sage, lllbkz_ntru.sage` - fpylll reduction for NTRU and ModFalcon.
+
+[BEF+17]
+[dBDPMW20]
+
 # How to use
 Run `build.sh` in the downloaded directory. This will build all necessary files.
 
-The interaction with the program is organized through the sage's interface. In order to import all necessary classes just type:
+The interaction with the program is organized through sage's interface. In order to import all necessary classes just type:
 
     from l2_ import *
- In order to generate a test 2x3 matrix `B` over 64-th cyclotomic field, LLL reduce it and obtain the result, type:
+ In order to generate a test 2x3 matrix `B` over 64-th cyclotomic field and LLL reduce it, type:
 
 
     from l2_ import *
@@ -48,17 +52,17 @@ The interaction with the program is organized through the sage's interface. In o
 The result will be stored in `B_red`.
 
 # Experiments
-To run the experiments of Section 5.1, type:
+To run the experiments from Section 5.1, type:
 
     > sage profile_tests.sage
-To run the experiments of Section 5.2, type:
+To run the experiments from Section 5.2, type:
 
     > sage ntru_experiment_dump.sage
-To run the experiments of Section 5.3, type:
+To run the experiments from Section 5.3, type:
 
     > sage modfalcon_experiment.sage
 
-To run the experiments of Section 5.4, type:
+To run the experiments from Section 5.4, type:
 
     > sage idealtest.sage
 
