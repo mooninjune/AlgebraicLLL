@@ -64,9 +64,11 @@ def pip_solver( a,b,seed=None ):  #if aOK+bOK is principal, finds g: gOK = aOK+b
         #else we go for a Gentry Szydlo
         print(f"Solving pip for f={2*d}")
 
+        varname = str(K.gen())
+
         pari( f"n={2*d}" )
-        pari( "g0="+str(a).replace("z","t") )
-        pari( "g1="+str(b).replace("z","t") )
+        pari( "g0="+str(a).replace(varname,"t") )   #prepeare input for pari gp
+        pari( "g1="+str(b).replace(varname,"t") )
         pari( "seed=\"" + str(seed) + "\"")
 
         then = perf_counter()

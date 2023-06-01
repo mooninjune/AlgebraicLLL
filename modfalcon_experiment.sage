@@ -78,8 +78,8 @@ def run_experiment( conductor,q,k,manual_descend=0,seed=0 ):
     if not isExist:
        # Create a new directory because it does not exist
        os.makedirs(path)
-
-    filename = path + f"MODFALC_f{conductor}_q{q}_k{k}_desc{manual_descend}_seed{seed}.txt"
+    strq = str(q) if q<10**14 else str(q.n(40)) #filename overflow fix
+    filename = path + f"MODFALC_f{conductor}_q{strq}_k{k}_desc{manual_descend}_seed{seed}.txt"
     try:
         with open(filename, 'w') as file:
             with contextlib.redirect_stdout(file):

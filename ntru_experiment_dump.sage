@@ -60,7 +60,8 @@ def ntru_experiment( f=512,q=next_prime(ceil(2^16.98)),beta=40,descend_number=0,
        os.makedirs(path)
 
     try:
-        filename = path + f"NTRU_f{f}_q{q}_b{beta}_desc{descend_number}_seed{seed}.txt"
+        strq = str(q) if q<10**14 else str(q.n(40)) #filename overflow fix
+        filename = path + f"NTRU_f{f}_q{strq}_b{beta}_desc{descend_number}_seed{seed}.txt"
         with open(filename, 'w') as file:
             with contextlib.redirect_stdout(file):
                 K.<z> = CyclotomicField(f)
