@@ -2,7 +2,7 @@
            AN ALGORITHM FOR FINDING A SHORT GENERATOR IN Q(\ZETA_512)
                    IMPLEMENTED BY ALEXANDRE GÉLIN - LIP6/UPMC
 *******************************************************************************/
-\\ This code has been taken from (https://alexgelin.fr/index_en.html) 
+\\ This code has been taken from (https://alexgelin.fr/index_en.html)
 
 
 \\build a random element in nf with coefficients in [-mcoeff..mcoeff]
@@ -59,6 +59,8 @@ allocatemem(2^10*11*10^6)
 AB = idealhnf(NF,g0,g1);
 [GSmat,GSgen]=GentrySzydlo(AB);
 BKZin=mattranspose(GSmat[1..n4,]);
+
+/*
 det=matdet(BKZin);
 \\External call to fplll for the BKZ reduction
 write("BKZin",BKZin);
@@ -79,3 +81,4 @@ res = Gen
 norm_err = idealnorm(NF,gen) / det^2;
 
 return(res)
+*/

@@ -291,4 +291,4 @@ for t in tasks:
 
 pool.close() #closing processes in order to avoid crashing
 process_output( output )
-print("NTRU 256 Done")
+print("NTRU 512 Done")

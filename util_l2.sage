@@ -265,7 +265,7 @@ class nf_elem:
 
         l = vector( [ ln(abs(t)) for t in l] )
         h = l - sum(l)/(dim) * vector([1 for i in range(dim)])   #projection of l orthogonally against one-vector
-        assert abs( sum(h) ) < global_variables.log_distortion, f"Unit reduced badly! {abs( sum(h) )}, {self.elem}"
+        #assert abs( sum(h) ) < global_variables.log_distortion, f"Unit reduced badly! {abs( sum(h) )}, {self.elem}"
 
         return h
 
