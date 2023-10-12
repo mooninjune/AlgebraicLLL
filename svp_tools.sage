@@ -146,26 +146,36 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
     n, m = B.nrows(), B.ncols()
 
     B = IntegerMatrix.from_matrix(B)
+    Uflatter = matrix.identity(B.nrows)
+
     print("Invoking flatter...")
     then =time.perf_counter()
-    B = flatter_interface(B)
+    BB = flatter_interface(B)
     print(f"flatter done in {time.perf_counter()-then}")
+    then =time.perf_counter()
+    #Uflatter = matrix( [matrix(ZZ,B).solve_left(b) for b in matrix(ZZ,BB)] ).change_ring(ZZ) #we need Uflatter
+    T = GSO.Mat(B, float_type="ld")
+    T.update_gso()
+    Uflatter = matrix( ZZ, [ [ round(t) for t in T.babai(b) ] for b in BB ] )
+    Uflatter = IntegerMatrix.from_matrix( Uflatter )
+    print(f"flatter Uflatter done in {time.perf_counter()-then}")
+    B = BB
 
     #BKZ
     RRf = RealField( 30 )
 
     if n>global_variables.mpfr_usage_threshold_dim or global_variables.bkz_scaling_factor>global_variables.mpfr_usage_threshold_prec or force_ld:
-        GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='mpfr')
+        GSO_M = GSO.Mat(B, U=Uflatter, float_type='mpfr')
         print(f"Reducing lattice of dimension {n}. Using: mpfr")
     else:
         if global_variables.bkz_scaling_factor<=global_variables.ld_usage_threshold_prec and n<=global_variables.ld_usage_threshold_dim:
-            GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='ld')
+            GSO_M = GSO.Mat(B, U=Uflatter, float_type='ld')
             print(f"Reducing lattice of dimension {n}. Using: ld")
         elif qd_avaliable:
-            GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='dd')   #dd is avaliable iff qd is avaliable
+            GSO_M = GSO.Mat(B, U=Uflatter, float_type='dd')   #dd is avaliable iff qd is avaliable
             print(f"Reducing lattice of dimension {n}. Using: dd")
         else:
-            GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='mpfr')
+            GSO_M = GSO.Mat(B, U=Uflatter, float_type='mpfr')
             print(f"Reducing lattice of dimension {n}. Using: mpfr")
     GSO_M.update_gso()
 
@@ -190,8 +200,9 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
 
     then=time.perf_counter()
 
-    block_sizes = [i for i in range(4,int(min(n,m,block_size)),2)]
-    block_sizes += [int(min(n,block_size))]
+    # block_sizes = [i for i in range(4,int(min(n,m,block_size)),2)]
+    # block_sizes += [int(min(n,block_size))]
+    block_sizes = [ i for i in range(4,min(n,m,block_size)+1) ]
 
     bkz = BKZReduction(GSO_M)
     sys.stdout.flush()    #flush after the LLL
@@ -215,6 +226,23 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
         if verbose:
             print('bkz for beta=',beta,' done in:', round_time, 'slope:', basis_quality(GSO_M)["/"], 'log r00:', RRf( log( bkz.M.get_r(0,0),2 )/2 ), 'task_id = ', task_id)
             sys.stdout.flush()  #flush after the BKZ call
+
+    par = BKZ_FPYLLL.Param(block_size,
+                           max_loops=4,
+                           flags=flags
+                           )
+    then_round=time.perf_counter()
+    bkz(par)
+    round_time = time.perf_counter()-then_round
+    if bkz_r00_abort:
+        bkz.M.update_gso()
+        new_log_r00 = log( bkz.M.get_r(0,0),2 )/2
+        if new_log_r00+log_bkz_abort_factor < old_log_r00:
+            print("r00 decreased. Aborting BKZ.")
+    if verbose:
+        print('unpruned bkz for beta=',beta,' done in:', round_time, 'slope:', basis_quality(GSO_M)["/"], 'log r00:', RRf( log( bkz.M.get_r(0,0),2 )/2 ), 'task_id = ', task_id)
+        sys.stdout.flush()  #flush after the BKZ call
+
     if verbose:
         gh = gaussian_heuristic([GSO_M.get_r(i,i) for i in range(n)])
         print('gh:', log(gh), 'true len:', RRf(log(GSO_M.get_r(0,0))))

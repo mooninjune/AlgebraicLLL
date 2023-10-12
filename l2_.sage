@@ -2,7 +2,7 @@
 Main file. Contains class L2, which implements LLL algorithm.
 Also contains function generate_FieldInfos that precomputes the Log-unit
 lattices (LUL) for various fields.
-To precompute LUL for fields of conductor up to 2**11 run generate_FieldInfos( 11 ).    
+To precompute LUL for fields of conductor up to 2**11 run generate_FieldInfos( 11 ).
 """
 
 from keflll_wrapper import ascend, descend, BezTransform
@@ -150,7 +150,7 @@ def lll_fft(
             G.size_reduce(FI,B,U, start=i+1, end=i+2,debug=debug)
             btmp = B[i+1] - sum( G.Mu[i+1][k]*B_star[k] for k in range(i) )
 
-            save_norm = log( G.Rr[i][i].alg_norm(),2 )
+            save_norm = log( G.Rr[i][i].alg_norm(),2 ) / 2
 
             # 2 X n projected matrix
             M = [
@@ -246,6 +246,15 @@ def lll_fft(
                             tested_us+=1
                             continue
 
+                    u0 = [ nf_elem(minkowski_embedding(uu)) for uu in u ]
+                    vi = M[0]*u0[0] + M[1]*u0[1]
+                    nvi = log(vi.alg_norm(),2)
+                    if nvi >= global_variables.log_basis_degradation_factor+abs(save_norm):
+                        if debug&debug_flags.verbose_anomalies:
+                            print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC}")
+                        tested_us+=1
+                        continue
+
                     U_ = BezTransform(FIs, lfi-1, u , debug=True, use_custom_idealaddtoone=use_custom_idealaddtoone)
                     if U_ != matrix.identity(2): #if bkz gave a good vector
                         if i > 0:
@@ -262,13 +271,13 @@ def lll_fft(
                     u0, u1 = [ nf_elem(minkowski_embedding(uu)) for uu in U_[0] ], [ nf_elem(minkowski_embedding(uu)) for uu in U_[1] ]
 
                     #save changes
-                    vi = M[0]*u0[0] + M[1]*u0[1]
-                    nvi = log(vi.alg_norm(),2)
-                    if nvi >= global_variables.log_basis_degradation_factor+abs(save_norm):
-                        if debug&debug_flags.verbose_anomalies:
-                            print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC}")
-                        tested_us+=1
-                        continue
+                    # vi = M[0]*u0[0] + M[1]*u0[1]
+                    # nvi = log(vi.alg_norm(),2)
+                    # if nvi >= global_variables.log_basis_degradation_factor+abs(save_norm):
+                    #     if debug&debug_flags.verbose_anomalies:
+                    #         print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC}")
+                    #     tested_us+=1
+                    #     continue
                     b     = B[i]
                     B[i]  = u0[0]*B[i]+u0[1]*B[i+1]
                     B[i+1]= u1[0]*b+u1[1]*B[i+1]
