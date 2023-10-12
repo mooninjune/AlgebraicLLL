@@ -28,6 +28,12 @@ import pickle
 from time import perf_counter
 import pickle
 
+if g6k_avaliable:
+    from pump import my_pump_n_jump_bkz_tour
+    from g6k import Siever, SieverParams
+    from g6k.algorithms.bkz import pump_n_jump_bkz_tour
+    from g6k.utils.stats import dummy_tracer
+
 def flatter_interface( fpylllB ):
     flatter_is_installed = os.system( "flatter -h flatter -h > /dev/null" ) == 0
 
@@ -45,7 +51,8 @@ def flatter_interface( fpylllB ):
 
         B = IntegerMatrix.from_file( filename_out )
         os.remove( filename_out )
-    return B
+        return B
+    return fpylllB
 
 def pip_solver( a,b,seed=None ):  #if aOK+bOK is principal, finds g: gOK = aOK+bOK
     """
@@ -227,22 +234,6 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
             print('bkz for beta=',beta,' done in:', round_time, 'slope:', basis_quality(GSO_M)["/"], 'log r00:', RRf( log( bkz.M.get_r(0,0),2 )/2 ), 'task_id = ', task_id)
             sys.stdout.flush()  #flush after the BKZ call
 
-    par = BKZ_FPYLLL.Param(block_size,
-                           max_loops=4,
-                           flags=flags
-                           )
-    then_round=time.perf_counter()
-    bkz(par)
-    round_time = time.perf_counter()-then_round
-    if bkz_r00_abort:
-        bkz.M.update_gso()
-        new_log_r00 = log( bkz.M.get_r(0,0),2 )/2
-        if new_log_r00+log_bkz_abort_factor < old_log_r00:
-            print("r00 decreased. Aborting BKZ.")
-    if verbose:
-        print('unpruned bkz for beta=',beta,' done in:', round_time, 'slope:', basis_quality(GSO_M)["/"], 'log r00:', RRf( log( bkz.M.get_r(0,0),2 )/2 ), 'task_id = ', task_id)
-        sys.stdout.flush()  #flush after the BKZ call
-
     if verbose:
         gh = gaussian_heuristic([GSO_M.get_r(i,i) for i in range(n)])
         print('gh:', log(gh), 'true len:', RRf(log(GSO_M.get_r(0,0))))
@@ -377,5 +368,50 @@ def bkz_reduce_ntru(B, block_size, verbose=False, task_id=None, sort=True, bkz_r
 
     if sort:
         U = matrix( [x for _, x in sorted(zip(GSO_M.B,U), key=lambda pair: norm(pair[0]))] )
+
+    return(U)
+
+def g6k_reduce(B, block_size, verbose=True, task_id=None, sort=True):
+    B = IntegerMatrix.from_matrix(B)
+    M = GSO.Mat(B, float_type=self.float_type,
+                    U=IntegerMatrix.identity(B.nrows, int_type=B.int_type),
+                    UinvT=IntegerMatrix.identity(B.nrows, int_type=B.int_type))
+
+    param_sieve = SieverParams()
+    param_sieve['threads'] = global_variables.sieve_threads
+    param_sieve['default_sieve'] = "bgj1"
+    g6k = Siever(M, param_sieve)
+    flags = BKZ_FPYLLL.AUTO_ABORT|BKZ_FPYLLL.MAX_LOOPS
+
+    for blocksize in range( 60,block_size+1 ):
+        for t in range(global_variables.bkz_max_loops):
+                    par = BKZ_FPYLLL.Param(blocksize,
+                                           max_loops=1,
+                                           strategies=BKZ_FPYLLL.DEFAULT_STRATEGY,
+                                           flags=flags
+                                           )
+                    then_round=time.perf_counter()
+                    g6k(par)
+                    round_time = time.perf_counter()-then_round
+                    if verbose:
+                        print('tour {t} bkz for beta=',beta,' done in:', round_time, 'slope:', basis_quality(GSO_M)["/"], 'log r00:', log( bkz.M.get_r(0,0),2 )/2, 'task_id = ', task_id)
+                        sys.stdout.flush()  #flush after the BKZ call
+                    if bkz_r00_abort:
+                        g6k.M.update_gso()
+                        new_log_r00 = log( g6k.M.get_r(0,0),2 )/2
+                        if new_log_r00+log_bkz_abort_factor < old_log_r00:
+                            print("r00 decreased. Aborting BKZ.")
+                            break
+    if verbose:
+        gh = gaussian_heuristic([M.get_r(i,i) for i in range(n)])
+        print('gh:', log(gh), 'true len:', RRf(log(M.get_r(0,0))))
+
+    dt=time.perf_counter()-then
+
+    print('All BKZ computed in',dt, 'sec')
+    U =  matrix(ZZ, M.U)
+
+    if sort:
+        U = matrix( [x for _, x in sorted(zip(M.B,U), key=lambda pair: norm(pair[0]))] )
 
     return(U)

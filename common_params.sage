@@ -21,6 +21,7 @@ global ld_usage_threshold_dim
 global bkz_max_loops
 global parisizemax
 global idealaddtoone_threshold
+global sieve_threads
 
 class global_variables:
     Prec = 300                          #Precision we are storing nf_elem and nf_vect with.
@@ -41,7 +42,7 @@ class global_variables:
     ld_usage_threshold_prec = 80       #maximal precision for using ld
     ld_usage_threshold_dim = 128        #maximal dimension for using ld
 
-    bkz_max_loops = 4                  #amount of tours in BKZ algorithm called during algebraic LLL
+    bkz_max_loops = 7                  #amount of tours in BKZ algorithm called during algebraic LLL
     parisizemax = 6442713088            #amount of memory allocated by pari gp (in Bytes)
     idealaddtoone_threshold = 256
     """
@@ -50,6 +51,8 @@ class global_variables:
     is really slow. If the dimension exceeds this limit, we use GEuclide to reduce the dimension until it
     reaches this value.
     """
+
+    sieve_threads = 5
 log_bkz_abort_factor = 1.1          #log base 2 of r00 decrease required to abort bkz (applicable only with flag bkz_r00_abort)
 
 RealNumber = RealField(global_variables.Prec)
@@ -104,3 +107,10 @@ except Exception as err:
     print(err)
     #print(f"{bcolors.WARNING}QD not found! Using mpfr... {bcolors.ENDC}")
     qd_avaliable = False
+
+try:
+    import g6k
+    g6k_avaliable = True
+except ModuleNotFoundError:
+    print(f"g6k is not avaliable")
+    g6k_avaliable = False
