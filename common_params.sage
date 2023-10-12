@@ -24,9 +24,9 @@ global idealaddtoone_threshold
 
 class global_variables:
     Prec = 300                          #Precision we are storing nf_elem and nf_vect with.
-    fplllPrec = 220                     #Fpylll's mpfr precision
-    bkz_scaling_factor = 180           #Maximum magnitude of matrix over ZZ that is allowed to be passed to fpylll BKZ (in bits). < 512
-    scale_factor_log_unit = 180         #Scale factor for Log Unit lattice
+    fplllPrec = 144                     #Fpylll's mpfr precision
+    bkz_scaling_factor = 80           #Maximum magnitude of matrix over ZZ that is allowed to be passed to fpylll BKZ (in bits). < 512
+    scale_factor_log_unit = 180         #Scale factor for Log Unit lattice if changed, one must regenerate the lattices (default: 180)
     threshold = 10^-14                  #threshold for assertions error when comparing equal values (e.g., norms)
     log_distortion = 10^-10             #bound on inaccuracy of log_unit_projection
     log_basis_degradation_factor = 50.0
@@ -36,12 +36,12 @@ class global_variables:
     If log(γ)<=log_basis_degradation_factor we allow that longer (wrt alg. norm) vector to be inserted for the sake of the basis randomization.
     """
     early_abort = None              #haven't decided how to implement it yet
-    mpfr_usage_threshold_prec = 128      #minimal precision to start using mpfr
+    mpfr_usage_threshold_prec = 144      #minimal precision to start using mpfr
     mpfr_usage_threshold_dim = 257      #minimal dimension to start using mpfr
     ld_usage_threshold_prec = 80       #maximal precision for using ld
     ld_usage_threshold_dim = 128        #maximal dimension for using ld
 
-    bkz_max_loops = 14                  #amount of tours in BKZ algorithm called during algebraic LLL
+    bkz_max_loops = 4                  #amount of tours in BKZ algorithm called during algebraic LLL
     parisizemax = 6442713088            #amount of memory allocated by pari gp (in Bytes)
     idealaddtoone_threshold = 256
     """

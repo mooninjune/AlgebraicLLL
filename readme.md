@@ -7,6 +7,7 @@ This repository contains the framework that reduces algebraic lattices defined o
  - [SageMath 9.8+](https://www.sagemath.org/)
  - Optionally install `multiprocess` by running `pip install multiprocess` in sage session.
  - Optionally update the FPYLLL in sage so that it supports qd. See: **Manual update of fpylll and fplll inside Sagemath 9.0+** in  [fpylll](https://github.com/fplll/fpylll).
+ - Optionally install [flatter](https://github.com/keeganryan/flatter)
 # Description of files
 The repository consists of the following files:
  - `l2_.sage` - main file that defines the interface between sage and the algorithm.

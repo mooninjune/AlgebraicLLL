@@ -12,6 +12,7 @@ import time
 from time import perf_counter
 from common_params import *
 from copy import deepcopy
+import os
 
 FPLLL.set_precision(global_variables.fplllPrec)
 
@@ -26,6 +27,25 @@ import pickle
 
 from time import perf_counter
 import pickle
+
+def flatter_interface( fpylllB ):
+    flatter_is_installed = os.system( "flatter -h flatter -h > /dev/null" ) == 0
+
+    if flatter_is_installed:
+        basis = '[' + fpylllB.__str__() + ']'
+        seed = randrange(2**32)
+        filename = f"lat{seed}.txt"
+        filename_out = f"redlat{seed}.txt"
+        with open(filename, 'w') as file:
+            file.write( "["+fpylllB.__str__()+"]" )
+
+        out = os.system( "flatter " + filename + " > " + filename_out )
+        time.sleep(float(0.05))
+        os.remove( filename )
+
+        B = IntegerMatrix.from_file( filename_out )
+        os.remove( filename_out )
+    return B
 
 def pip_solver( a,b,seed=None ):  #if aOK+bOK is principal, finds g: gOK = aOK+bOK
     """
@@ -126,6 +146,10 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
     n, m = B.nrows(), B.ncols()
 
     B = IntegerMatrix.from_matrix(B)
+    print("Invoking flatter...")
+    then =time.perf_counter()
+    B = flatter_interface(B)
+    print(f"flatter done in {time.perf_counter()-then}")
 
     #BKZ
     RRf = RealField( 30 )
@@ -138,8 +162,8 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
             GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='ld')
             print(f"Reducing lattice of dimension {n}. Using: ld")
         elif qd_avaliable:
-            GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='qd')   #'qd'
-            print(f"Reducing lattice of dimension {n}. Using: qd")
+            GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='dd')   #dd is avaliable iff qd is avaliable
+            print(f"Reducing lattice of dimension {n}. Using: dd")
         else:
             GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='mpfr')
             print(f"Reducing lattice of dimension {n}. Using: mpfr")
@@ -176,7 +200,8 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
     for beta in block_sizes:    #BKZ reduce the basis
         par = BKZ_FPYLLL.Param(beta,
                                max_loops=global_variables.bkz_max_loops,
-                               flags=flags
+                               flags=flags,
+                               strategies=BKZ_FPYLLL.DEFAULT_STRATEGY
                                )
         then_round=time.perf_counter()
         bkz(par)
@@ -282,6 +307,7 @@ def bkz_reduce_ntru(B, block_size, verbose=False, task_id=None, sort=True, bkz_r
             break
         par = BKZ_FPYLLL.Param(beta,
                                max_loops=global_variables.bkz_max_loops,
+                               strategies=BKZ_FPYLLL.DEFAULT_STRATEGY,
                                flags=flags
                                )
         then_round=time.perf_counter()
