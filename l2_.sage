@@ -249,9 +249,9 @@ def lll_fft(
                     u0 = [ nf_elem(minkowski_embedding(uu)) for uu in u ]
                     vi = M[0]*u0[0] + M[1]*u0[1]
                     nvi = log(vi.alg_norm(),2)
-                    if nvi >= global_variables.log_basis_degradation_factor+abs(save_norm):
+                    if nvi >= global_variables.log_basis_degradation_factor+(save_norm):
                         if debug&debug_flags.verbose_anomalies:
-                            print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC}")
+                            print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC} with a margin {global_variables.log_basis_degradation_factor}")
                         tested_us+=1
                         continue
 

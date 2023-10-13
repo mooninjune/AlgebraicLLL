@@ -66,7 +66,7 @@ class LLL_params:
 
             # make sure bkz_scaling_factor_user is less than mpfr_usage_threshold_prec with some gap, otherwise the approxCVP on log-unit lattice in BezTransform
             # might crash
-            global_variables.log_basis_degradation_factor = 20.0
+            global_variables.log_basis_degradation_factor = 60.0
             if d<=128 and q<=2^18:
                 LLL_params.set_precision(Prec_user=144, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=50)
             elif d<=256 and q<=2^32:
