@@ -56,8 +56,10 @@ def ntru_experiment( f=512,q=next_prime(ceil(2^16.98)),beta=40,descend_number=0,
     path = "ntruexp_folder/"
     isExist = os.path.exists(path)
     if not isExist:
-       # Create a new directory because it does not exist
-       os.makedirs(path)
+        try:
+            os.makedirs(path)
+        except:
+            pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception. 
 
     try:
         strq = str(q) if q<10**14 else str(q.n(40)) #filename overflow fix
