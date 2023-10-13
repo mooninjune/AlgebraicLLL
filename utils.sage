@@ -9,7 +9,7 @@ from itertools import chain
 import time
 from common_params import *
 
-from svp_tools import bkz_reduce, bkz_reduce_ntru
+from svp_tools import bkz_reduce, bkz_reduce_ntru, g6k_reduce
 
 FPLLL.set_precision(global_variables.fplllPrec)
 from copy import deepcopy
@@ -191,9 +191,14 @@ def svp_coeff(M,K, bkz_beta=14, verbose=False, bkz_r00_abort=False, bkz_DSD_tric
     param bkz_r00_abort: see bkz_r00_abort in bkz_reduce.
     """
     if bkz_DSD_trick:
-        U_ = bkz_reduce_ntru(M, block_size=bkz_beta, verbose=verbose, bkz_r00_abort=bkz_r00_abort)
+        U_ = bkz_reduce_ntru(M, block_size=min(60,bkz_beta), verbose=verbose, bkz_r00_abort=bkz_r00_abort)
     else:
-        U_ = bkz_reduce(M, block_size=bkz_beta, verbose=verbose, bkz_r00_abort=bkz_r00_abort)
+        U_ = bkz_reduce(M, block_size=min(60,bkz_beta), verbose=verbose, bkz_r00_abort=bkz_r00_abort)
+
+    if bkz_beta>=60:
+         U2_ = g6k_reduce(M, bkz_beta, verbose=True, task_id=None, sort=True)
+         U_ = U2_ * U_
+
     U = [None for i in range(U_.nrows())]
     d=K.degree()
     for i in range(U_.nrows()):

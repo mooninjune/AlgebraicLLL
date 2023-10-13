@@ -373,15 +373,18 @@ def bkz_reduce_ntru(B, block_size, verbose=False, task_id=None, sort=True, bkz_r
 
 def g6k_reduce(B, block_size, verbose=True, task_id=None, sort=True):
     B = IntegerMatrix.from_matrix(B)
-    M = GSO.Mat(B, float_type=self.float_type,
+    n = B.nrows
+    M = GSO.Mat(B, float_type="dd",
                     U=IntegerMatrix.identity(B.nrows, int_type=B.int_type),
                     UinvT=IntegerMatrix.identity(B.nrows, int_type=B.int_type))
+    M.update_gso()
 
     param_sieve = SieverParams()
     param_sieve['threads'] = global_variables.sieve_threads
     param_sieve['default_sieve'] = "bgj1"
     g6k = Siever(M, param_sieve)
     flags = BKZ_FPYLLL.AUTO_ABORT|BKZ_FPYLLL.MAX_LOOPS
+    then = time.perf_counter()
 
     for blocksize in range( 60,block_size+1 ):
         for t in range(global_variables.bkz_max_loops):
@@ -391,20 +394,20 @@ def g6k_reduce(B, block_size, verbose=True, task_id=None, sort=True):
                                            flags=flags
                                            )
                     then_round=time.perf_counter()
-                    g6k(par)
+                    my_pump_n_jump_bkz_tour(g6k, dummy_tracer, blocksize, jump=1,
+										 filename="devnull", seed=1,
+										 dim4free_fun="default_dim4free_fun",
+										 dim4free_param=[11.5,0.075],
+										 extra_dim4free=0,
+										 pump_params={'down_sieve': False},
+										 verbose=verbose)
                     round_time = time.perf_counter()-then_round
                     if verbose:
-                        print('tour {t} bkz for beta=',beta,' done in:', round_time, 'slope:', basis_quality(GSO_M)["/"], 'log r00:', log( bkz.M.get_r(0,0),2 )/2, 'task_id = ', task_id)
+                        print('tour ', t, ' bkz for beta=',blocksize,' done in:', round_time, 'slope:', basis_quality(M)["/"], 'log r00:', float( log( g6k.M.get_r(0,0),2 )/2 ), 'task_id = ', task_id)
                         sys.stdout.flush()  #flush after the BKZ call
-                    if bkz_r00_abort:
-                        g6k.M.update_gso()
-                        new_log_r00 = log( g6k.M.get_r(0,0),2 )/2
-                        if new_log_r00+log_bkz_abort_factor < old_log_r00:
-                            print("r00 decreased. Aborting BKZ.")
-                            break
     if verbose:
         gh = gaussian_heuristic([M.get_r(i,i) for i in range(n)])
-        print('gh:', log(gh), 'true len:', RRf(log(M.get_r(0,0))))
+        print('gh:', log(gh), 'true len:', (log(M.get_r(0,0))))
 
     dt=time.perf_counter()-then
 
