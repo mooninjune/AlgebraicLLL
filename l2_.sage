@@ -213,7 +213,7 @@ def lll_fft(
                         print(f"Is O_K: {is_OK} | {str(ssOK)}")
                     if not is_OK and not( ns0==0 or ns1==0 or log(gcdss,2) in ZZ  ) and not tested_us>pip_per_svp:
                         if (debug&debug_flags.dump_gcdbad):
-                            filedump = f"gcd{gcdss}.txt"
+                            filedump = f"gcd{float(gcdss): .5f}.txt"
                             with open(filedump, 'a') as file:
                                 file.write(f"{gcdss}\n")
                                 file.write(f"{str(s0)}\n")

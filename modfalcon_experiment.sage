@@ -72,7 +72,7 @@ def descend_L( B, depth=1 ):
     return descend_L( M,depth-1 )
 
 
-def run_experiment( conductor,q,k,manual_descend=0,seed=0 ):
+def run_experiment( conductor,q,k,manual_descend=0, beta=35, seed=0 ):
     path = "modfalcon_folder/"
     isExist = os.path.exists(path)
     if not isExist:
@@ -132,8 +132,9 @@ def run_experiment( conductor,q,k,manual_descend=0,seed=0 ):
                 if manual_descend:
                     B = descend_L( B,manual_descend )
 
-                lllpar = LLL_params.overstretched_NTRU( 2*d,q,descend_number=0, beta=35 )
-                lllpar["debug"] = debug_flags.verbose_anomalies|debug_flags.dump_gcdbad
+                lllpar = LLL_params.overstretched_NTRU( 2*d,q,descend_number=0, beta=beta )
+                lllpar["debug"] = debug_flags.verbose_anomalies #|debug_flags.dump_gcdbad
+                global_variables.log_basis_degradation_factor = 144.0
 
                 lll = L2(B, strategy=lllpar)
                 then = perf_counter()
@@ -189,7 +190,7 @@ def process_output( output ):
         print( f"{key}: {mean(d[key][0])}, {mean(d[key][1])}, {mean(d[key][2])}, {d[key][3]} " )
 
 
-nthreads = 20
+nthreads = 6
 tests_per_q = 20
 
 # k=2
@@ -197,6 +198,7 @@ qs = [ next_prime(round(p)) for p in [ 2**10, 2**10.4, 2**10.8, 2**11.2, 2**11.6
 f=128
 k=2
 manual_descend = 0
+beta=35
 
 output = []
 pool = Pool(processes = nthreads )
@@ -207,7 +209,7 @@ seed = 0
 print( f"f={f}, qs={qs}, k={k}" )
 for q in qs:
     tasks.append( pool.apply_async(
-    run_experiment, (f,q,k,manual_descend,seed)
+    run_experiment, (f,q,k,manual_descend,beta,seed)
     ) )
     seed += 1
 
@@ -222,6 +224,7 @@ qs = [ next_prime(round(p)) for p in [ 2**16.2, 2**16.5, 2**16.8, 2**17.1, 2**17
 f=128
 k=3
 manual_descend = 0
+beta=40
 
 output = []
 pool = Pool(processes = nthreads )
@@ -232,7 +235,7 @@ seed = 0
 print( f"f={f}, qs={qs}, k={k}" )
 for q in qs:
     tasks.append( pool.apply_async(
-    run_experiment, (f,q,k,manual_descend,seed)
+    run_experiment, (f,q,k,manual_descend,beta,seed)
     ) )
     seed += 1
 

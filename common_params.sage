@@ -22,6 +22,7 @@ global bkz_max_loops
 global parisizemax
 global idealaddtoone_threshold
 global sieve_threads
+global sieve_for_bkz
 
 class global_variables:
     Prec = 300                          #Precision we are storing nf_elem and nf_vect with.
@@ -52,7 +53,9 @@ class global_variables:
     reaches this value.
     """
 
-    sieve_threads = 5
+    sieve_threads = 5                   #amount of threads utilized by the BKZ
+    sieve_for_bkz = "bgj1"              #the sieve that BKZ uses
+    
 log_bkz_abort_factor = 1.1          #log base 2 of r00 decrease required to abort bkz (applicable only with flag bkz_r00_abort)
 
 RealNumber = RealField(global_variables.Prec)

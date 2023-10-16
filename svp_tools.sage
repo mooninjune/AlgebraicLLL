@@ -278,18 +278,20 @@ def bkz_reduce_ntru(B, block_size, verbose=False, task_id=None, sort=True, bkz_r
     #BKZ
 
     if n>global_variables.mpfr_usage_threshold_dim or global_variables.bkz_scaling_factor>global_variables.mpfr_usage_threshold_prec:
-        GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='mpfr')
+        float_type='mpfr'
         print(f"Reducing lattice of dimension {n}. Using: mpfr")
     else:
         if global_variables.bkz_scaling_factor<=global_variables.ld_usage_threshold_prec and n<=global_variables.ld_usage_threshold_dim:
-            GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='ld')
+            float_type='ld'
             print(f"Reducing lattice of dimension {n}. Using: ld")
         elif qd_avaliable:
-            GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='qd')   #'qd'
+            float_type='qd'
             print(f"Reducing lattice of dimension {n}. Using: qd")
         else:
-            GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type='mpfr')
+            float_type='mpfr'
             print(f"Reducing lattice of dimension {n}. Using: mpfr")
+
+    GSO_M = GSO.Mat(B, U=IntegerMatrix.identity(B.nrows), float_type=float_type)
     GSO_M.update_gso()
 
     old_log_r00 = log( GSO_M.get_r(0,0),2 )/2
@@ -374,30 +376,38 @@ def bkz_reduce_ntru(B, block_size, verbose=False, task_id=None, sort=True, bkz_r
 def g6k_reduce(B, block_size, verbose=True, task_id=None, sort=True):
     B = IntegerMatrix.from_matrix(B)
     n = B.nrows
-    M = GSO.Mat(B, float_type="dd",
+
+    if n>global_variables.mpfr_usage_threshold_dim or global_variables.bkz_scaling_factor>global_variables.mpfr_usage_threshold_prec:
+        float_type='mpfr'
+        print(f"Reducing lattice of dimension {n}. Using: mpfr")
+    else:
+        if global_variables.bkz_scaling_factor<=global_variables.ld_usage_threshold_prec and n<=global_variables.ld_usage_threshold_dim:
+            float_type='ld'
+            print(f"Reducing lattice of dimension {n}. Using: ld")
+        elif qd_avaliable:
+            float_type='qd'
+            print(f"Reducing lattice of dimension {n}. Using: qd")
+        else:
+            float_type='mpfr'
+            print(f"Reducing lattice of dimension {n}. Using: mpfr")
+
+    M = GSO.Mat(B, float_type=float_type,
                     U=IntegerMatrix.identity(B.nrows, int_type=B.int_type),
                     UinvT=IntegerMatrix.identity(B.nrows, int_type=B.int_type))
     M.update_gso()
 
     param_sieve = SieverParams()
     param_sieve['threads'] = global_variables.sieve_threads
-    param_sieve['default_sieve'] = "bgj1"
+    param_sieve['default_sieve'] = global_variables.sieve_for_bkz #"bgj1"
     g6k = Siever(M, param_sieve)
-    flags = BKZ_FPYLLL.AUTO_ABORT|BKZ_FPYLLL.MAX_LOOPS
     then = time.perf_counter()
 
     for blocksize in range( 60,block_size+1 ):
         for t in range(global_variables.bkz_max_loops):
-                    par = BKZ_FPYLLL.Param(blocksize,
-                                           max_loops=1,
-                                           strategies=BKZ_FPYLLL.DEFAULT_STRATEGY,
-                                           flags=flags
-                                           )
                     then_round=time.perf_counter()
                     my_pump_n_jump_bkz_tour(g6k, dummy_tracer, blocksize, jump=1,
 										 filename="devnull", seed=1,
 										 dim4free_fun="default_dim4free_fun",
-										 dim4free_param=[11.5,0.075],
 										 extra_dim4free=0,
 										 pump_params={'down_sieve': False},
 										 verbose=verbose)

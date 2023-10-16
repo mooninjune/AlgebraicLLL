@@ -4,7 +4,6 @@ This is a modified pump.py file from
 https://github.com/fplll/g6k/blob/master/g6k/algorithms/pump.py
 
 The modifications include:
--- custom_dim4free_fun(): the user chooses their own [a,b] to have a+b*blocksize dim4free
 -- in case of saturatin error we dump the GSO (for the purpose of understanding why this even happens frequently for ntru lattices)
 
 """
@@ -64,22 +63,8 @@ def wrapped_sieve(pump, blocksize, filename, seed):
     return cont
 
 
-def dim4free_wrapper(dim4free_fun, dim4free_param, blocksize):
-    """
-    Deals with correct dim4free choices for edge cases when non default
-    function is chosen.
 
-    :param dim4free_fun: the function for choosing the amount of dim4free
-    :param blocksize: the BKZ blocksize
-
-    """
-    if blocksize < 40:
-        return 0
-    dim4free = dim4free_fun(blocksize, dim4free_param)
-    return int(min((blocksize - 40)/2, dim4free))
-
-
-def default_dim4free_fun(blocksize, dim4free_param):
+def default_dim4free_fun(blocksize):
     """
     Return expected number of dimensions for free, from exact-SVP experiments.
 
@@ -88,14 +73,6 @@ def default_dim4free_fun(blocksize, dim4free_param):
     """
     return int(11.5 + 0.075*blocksize)
 
-def custom_dim4free_fun(blocksize, dim4free_param):
-    """
-    Return expected number of dimensions for free, from exact-SVP experiments.
-
-    :param blocksize: the BKZ blocksize
-
-    """
-    return int(dim4free_param[0] + dim4free_param[1]*blocksize)
 
 def scoring_(i, nlen, olen, aux):
     return i == aux.kappa and nlen < aux.goal_r0
@@ -196,7 +173,7 @@ def pump(g6k, tracer, kappa, blocksize, dim4free, filename, seed, down_sieve=Fal
 
 def my_pump_n_jump_bkz_tour(g6k, tracer, blocksize, jump=1,
                          filename=None, seed=None,
-                         dim4free_fun=default_dim4free_fun, dim4free_param=[11.5, 0.075], extra_dim4free=0,
+                         dim4free_fun=default_dim4free_fun, extra_dim4free=0,
                          pump_params=None, goal_r0=0., verbose=False):
     """
     Run a PumpNjump BKZ-tour: call Pump consecutively on every (jth) block.
@@ -226,7 +203,7 @@ def my_pump_n_jump_bkz_tour(g6k, tracer, blocksize, jump=1,
     if isinstance(dim4free_fun, six.string_types):
         dim4free_fun = eval(dim4free_fun)
 
-    dim4free = default_dim4free_fun(blocksize, dim4free_param) + extra_dim4free # dim4free_wrapper(dim4free_fun, dim4free_param, blocksize) + extra_dim4free
+    dim4free = default_dim4free_fun(blocksize) + extra_dim4free # dim4free_wrapper(dim4free_fun, dim4free_param, blocksize) + extra_dim4free
     blocksize += extra_dim4free
 
     indices  = [(0, blocksize - dim4free + i, i) for i in range(0, dim4free, jump)]
