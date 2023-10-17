@@ -488,9 +488,9 @@ class L2:
             print('LLL uses gamma_sub = ', strategy["gamma_sub"], 'to check Lovàsz condition in all recursive calls ')
             print('-----------------------------------')
 
-        if strategy["bkz_beta"] >= 60 and nor g6k_avaliable:
+        if strategy["bkz_beta"] >= 60 and not g6k_avaliable:
             print( f"{bcolors.WARNING}g6k not recognized. BKZ max blocksize set to 60.{bcolors.ENDC}" )
-            
+
         # Main call to lll_fft. The basis should be in the fft domain
         B_ = [ nf_vect( [minkowski_embedding(bij) for bij in self.B[i]] ) for i in range(self.nrows) ]
         U = lll_fft(
