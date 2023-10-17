@@ -14,6 +14,7 @@ try:
 except ModuleNotFoundError:
     from multiprocessing import Pool
 
+from svp_tools import flatter_interface
 import numpy as np
 
 def projection(basis, projectLeft):
@@ -103,8 +104,11 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),beta=4,seed=randrange(2^32
                     [h_,  1]
                 ])
 
-                B_red = [b.list() for b in embed_Q( B )]
-                tmp = projection(B_red,True)
+                then = perf_counter()
+                B_red = IntegerMatrix.from_matrix( matrix(ZZ,[b.list() for b in embed_Q( B )]) )
+                B_red = flatter_interface( B_red )
+                print(f"flatter done in {perf_counter()-then} ")
+                tmp = B_red #projection(B_red,True)
                 B_red = matrix( ZZ,tmp )
                 B_red = IntegerMatrix.from_matrix( B_red )
                 if d<=100:
@@ -140,7 +144,7 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),beta=4,seed=randrange(2^32
                 Mproj = Mproj[ :2*d-Mproj.nullity() ]  #resolve linear dependency
 
                 B_red = IntegerMatrix.from_matrix( Mproj )
-                G = GSO.Mat( B_red,float_type='ld' )
+                G = GSO.Mat( B_red,float_type='dd' )
                 G.update_gso()
 
                 bkz_obj = BKZReduction(G)
@@ -150,10 +154,12 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),beta=4,seed=randrange(2^32
                     then = perf_counter()
                     par = BKZ_FPYLLL.Param(beta_counter,
                                                max_loops=14,
+                                               strategies=BKZ_FPYLLL.DEFAULT_STRATEGY,
                                                flags=flags
                                                )
                     bkz_obj(par)
                     print(f"BKZ done in {perf_counter()-then}; beta={beta_counter}, r_00^2={bkz_obj.M.get_r(0,0)}")
+                    sys.stdout.flush()
 
                     w = vector( projected( matrix(G.B)[0] ) )
                     f1, g1 =  K( list(w)[:d] ), K( list(w)[d:] )
@@ -222,13 +228,13 @@ def process_output( output ):
     time.sleep( float(0.02) )  #give a time for the program to dump everything to the disc
 
 
-nthreads = 4
+nthreads = 3
 tests_per_q = 3
 dump_public_key = False
 
-f=128
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [13] ] * tests_per_q
-beta=20
+f=512
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [16.5] ] * tests_per_q
+beta=36
 
 output = []
 pool = Pool(processes = nthreads )

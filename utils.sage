@@ -195,7 +195,7 @@ def svp_coeff(M,K, bkz_beta=14, verbose=False, bkz_r00_abort=False, bkz_DSD_tric
     else:
         U_ = bkz_reduce(M, block_size=min(60,bkz_beta), verbose=verbose, bkz_r00_abort=bkz_r00_abort)
 
-    if bkz_beta>=60:
+    if bkz_beta>=60 and g6k_avaliable:
         M = IntegerMatrix.from_matrix( (U_*matrix(M)).change_ring(ZZ) )
         U2_ = g6k_reduce(M, bkz_beta, verbose=True, task_id=None, sort=True)
         U_ = U2_ * U_

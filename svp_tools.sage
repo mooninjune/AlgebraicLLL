@@ -374,6 +374,15 @@ def bkz_reduce_ntru(B, block_size, verbose=False, task_id=None, sort=True, bkz_r
     return(U)
 
 def g6k_reduce(B, block_size, verbose=True, task_id=None, sort=True):
+    """
+    BKZ reduces the basis. Requires installed g6k.
+    param B: matrix over ZZ with coefficients < 512 bit.
+    param block_size: block size for BKZ.
+    param verbose: flag showing if the information being verbosed.
+    param task_id: task number. Useful in multithreading.
+    param sort: if True the vectors are sorted according to their length so the U[0]*B is the shortest among the vectors in U*B.
+    Returns U, such that U*B is ~BKZ-block_size reduced.
+    """
     B = IntegerMatrix.from_matrix(B)
     n = B.nrows
 
