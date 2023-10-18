@@ -107,7 +107,8 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),beta=4,seed=randrange(2^32
                 then = perf_counter()
                 B_red = IntegerMatrix.from_matrix( matrix(ZZ,[b.list() for b in embed_Q( B )]) )
                 B_red = flatter_interface( B_red )
-                print(f"flatter done in {perf_counter()-then} ")
+                flattime = perf_counter()-then
+                print(f"flatter done in {flattime} ")
                 tmp = B_red #projection(B_red,True)
                 B_red = matrix( ZZ,tmp )
                 B_red = IntegerMatrix.from_matrix( B_red )
@@ -138,7 +139,7 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),beta=4,seed=randrange(2^32
                     print( f"DSD event over field K={K}, q={q}, after LLL profile check" )
                     profile = True
                 if multiple or profile:
-                    return q, len_lll/exp_len, len_lll/exp_len, lll_t, 0, True, 2, multiple+2*profile
+                    return q, len_lll/exp_len, len_lll/exp_len, lll_t+flattime, 0, True, 2, multiple+2*profile
 
                 Mproj = matrix( ZZ,lll_obj.M.B  )
                 Mproj = Mproj[ :2*d-Mproj.nullity() ]  #resolve linear dependency
@@ -228,12 +229,12 @@ def process_output( output ):
     time.sleep( float(0.02) )  #give a time for the program to dump everything to the disc
 
 
-nthreads = 3
+nthreads = 4
 tests_per_q = 3
 dump_public_key = False
 
-f=512
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [16.5] ] * tests_per_q
+f=256
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [12.0,13.0] ] * tests_per_q
 beta=36
 
 output = []
@@ -256,3 +257,5 @@ for t in tasks:
         output.append( o )
 
 pool.close() #closing processes in order to avoid crashing
+
+print( process_output(output) )
