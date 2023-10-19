@@ -19,6 +19,7 @@ class LLL_params:
             kwarg use_custom_idealaddtoone: use our implenentation of pari gp's idealaddtoone.
             kwarg first_block_beta: if >0 the first SVP oracle call is called with specified block size
             kwarg use_pip_solver: use pip after first reduction
+            kwarg min_runs_amount: LLL will perform at least min_runs_amount tours
             kwarg experiment_name: part of a name of the file intermediate basis will be dumped to
             """
             self.params = dict()
@@ -28,7 +29,7 @@ class LLL_params:
                     ("rho",12), ("rho_sub",12), ("gamma",0.2), ("gamma_sub",0.16), ("bkz_beta",20), ("svp_oracle_threshold",64),
                     ("use_coeff_embedding",False), ("debug",0), ("verbose",True), ("early_abort_niters",False), ("early_abort_r00_decrease",False),
                     ("dump_intermediate_basis",False), ("bkz_r00_abort",False), ("use_custom_idealaddtoone",True), ("first_block_beta",0), ("use_pip_solver",True),
-                    ("experiment_name", randrange(2^32))
+                    ("min_runs_amount",0), ("experiment_name", randrange(2^32))
                 )
             for k in default_params:
                 if not k[0] in kwargs.keys():

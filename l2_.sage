@@ -34,7 +34,7 @@ def dot_product(v,w):
 def lll_fft(
         B, K=None, FIs=None, rho=9, rho_sub=9, gamma=0.98, gamma_sub=0.5, bkz_beta=8, svp_oracle_threshold = 32, use_coeff_embedding=False,
         debug=0, verbose=True, early_abort_niters=False, early_abort_r00_decrease=False, dump_intermediate_basis=False, bkz_r00_abort=False,
-        use_custom_idealaddtoone=True, first_block_beta=0, use_pip_solver=False, experiment_name=None):
+        use_custom_idealaddtoone=True, first_block_beta=0, use_pip_solver=False, min_runs_amount = 0, experiment_name=None):
     """
     Perform algebraic LLL reduction à la KEF-LLL on a free algebraic module defined by the row-vectors of B.
     param B: basis of a lattice over CyclotomicField (must consist of nf_vect) in the fft domain
@@ -111,7 +111,7 @@ def lll_fft(
     good_blocks = [ True for i in range(n-1) ]  #indicates if the SVP on block i improved the basis
     #(if bkz does not improve on block i, it will not improve on it later, until the block gets updated - we set good_blocks[i]=False)
     while num_idle_Lovacz<n-1:
-        if early_abort_niters and iota>=rho:
+        if early_abort_niters:
             print(f"Early abort after {tour_num} iterations!")
             break
         i=iota%(n-1)
@@ -308,7 +308,7 @@ def lll_fft(
                         num_idle_Lovacz+=1   #Nothing done, so we increase num_idle_Lovacz
                 except ValueError as e:
                     tested_us+=1
-                    print(e)
+                    print(e)min_runs_amount
                     continue
                 except ZeroDivisionError as e:
                     tested_us+=1
@@ -339,7 +339,8 @@ def lll_fft(
             ak = new_alg_profile[0]-new_alg_profile[1]
             logg = (ak/2 - d*(log(d,2)+1)) / (2*d)
             print(f"Gamma required to trigger non-Lovasz condition again is: {(2^logg).n()}")
-
+        if iota < min_runs_amount*(n-1):
+            num_idle_Lovacz=0
         if i==n-2:
             if dump_intermediate_basis:
                 with open(filename, "wb") as f:
@@ -400,7 +401,7 @@ def report_summary( G,B,K,log_alpha_K_sq,gamma,old_eucl_profile,old_alg_profile 
     print('---------- Summary report -----------')
 
     print("Alg_profile:")
-    print("      old          |  new ")
+    print("      old          |  new ")min_runs_amount
     for i in range(n):
         print( f"{old_alg_profile[i].n(50) }, {new_alg_profile[i].n(50)}" )
     print("Euclidean lengths of basis vectors:")
@@ -488,8 +489,6 @@ class L2:
             print('LLL uses gamma_sub = ', strategy["gamma_sub"], 'to check Lovàsz condition in all recursive calls ')
             print('-----------------------------------')
 
-        if strategy["bkz_beta"] >= 60 and not g6k_avaliable:
-            print( f"{bcolors.WARNING}g6k not recognized. BKZ max blocksize set to 60.{bcolors.ENDC}" )
 
         # Main call to lll_fft. The basis should be in the fft domain
         B_ = [ nf_vect( [minkowski_embedding(bij) for bij in self.B[i]] ) for i in range(self.nrows) ]
