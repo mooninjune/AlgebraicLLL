@@ -308,7 +308,7 @@ def lll_fft(
                         num_idle_Lovacz+=1   #Nothing done, so we increase num_idle_Lovacz
                 except ValueError as e:
                     tested_us+=1
-                    print(e)min_runs_amount
+                    print(e)
                     continue
                 except ZeroDivisionError as e:
                     tested_us+=1
@@ -401,7 +401,7 @@ def report_summary( G,B,K,log_alpha_K_sq,gamma,old_eucl_profile,old_alg_profile 
     print('---------- Summary report -----------')
 
     print("Alg_profile:")
-    print("      old          |  new ")min_runs_amount
+    print("      old          |  new ")
     for i in range(n):
         print( f"{old_alg_profile[i].n(50) }, {new_alg_profile[i].n(50)}" )
     print("Euclidean lengths of basis vectors:")
