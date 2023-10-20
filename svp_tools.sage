@@ -13,6 +13,7 @@ from time import perf_counter
 from common_params import *
 from copy import deepcopy
 import os
+import subprocess, re, shutil
 
 FPLLL.set_precision(global_variables.fplllPrec)
 
@@ -35,22 +36,49 @@ if g6k_avaliable:
     from g6k.utils.stats import dummy_tracer
 
 def flatter_interface( fpylllB ):
-    flatter_is_installed = os.system( "flatter -h flatter -h > /dev/null" ) == 0
+    flatter_is_installed = os.system( "flatter -h > /dev/null" ) == 0
 
     if flatter_is_installed:
         basis = '[' + fpylllB.__str__() + ']'
         seed = randrange(2**32)
         filename = f"lat{seed}.txt"
-        filename_out = f"redlat{seed}.txt"
+        # filename_out = f"redlat{seed}.txt"
+        while os.path.exists(filename):
+            filename = f"lat{seed}_{randrange(1024)}.txt"
+        # while os.path.exists(filename_out):
+        #     filename = f"redlat{seed}_{randrange(1024)}.txt"
+
         with open(filename, 'w') as file:
             file.write( "["+fpylllB.__str__()+"]" )
 
-        out = os.system( "flatter " + filename + " > " + filename_out )
+        # out = os.system( "flatter " + filename + " > " + filename_out )
+        command = ["flatter", filename]
+        try:
+            # Run the command and capture its output
+            out = subprocess.check_output(command, text=True, stderr=subprocess.STDOUT)
+            # Process the output as needed
+        except subprocess.CalledProcessError as e:
+            # Handle any errors, e.g., print the error message
+            print(f"Error: {e.returncode} - {e.output}")
+            return fpylllB
+
+        elements = out.split()
+        # Initialize an empty string to store the modified output
+        output_string = ""
+
+        # Iterate through the elements
+        for element in elements:
+            if element.endswith(']'):
+                output_string += element + ","
+            else:
+                output_string += element + " "
+
         time.sleep(float(0.05))
         os.remove( filename )
-
-        B = IntegerMatrix.from_file( filename_out )
-        os.remove( filename_out )
+        output_string = re.sub(r'(\d)\s', r'\1, ', out)
+        output_string = re.sub(r']\s', '],', output_string)[:-1]
+        out = eval( output_string )
+        B = IntegerMatrix.from_matrix( out )
         return B
     return fpylllB
 
@@ -374,15 +402,6 @@ def bkz_reduce_ntru(B, block_size, verbose=False, task_id=None, sort=True, bkz_r
     return(U)
 
 def g6k_reduce(B, block_size, verbose=True, task_id=None, sort=True):
-    """
-    BKZ reduces the basis. Requires installed g6k.
-    param B: matrix over ZZ with coefficients < 512 bit.
-    param block_size: block size for BKZ.
-    param verbose: flag showing if the information being verbosed.
-    param task_id: task number. Useful in multithreading.
-    param sort: if True the vectors are sorted according to their length so the U[0]*B is the shortest among the vectors in U*B.
-    Returns U, such that U*B is ~BKZ-block_size reduced.
-    """
     B = IntegerMatrix.from_matrix(B)
     n = B.nrows
 

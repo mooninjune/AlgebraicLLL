@@ -201,12 +201,12 @@ def lll_fft(
                     us[ii] =vector( [tmp0,tmp1] )
                 print(f"{bcolors.OKGREEN}Ascend {d/2}->{d} {bcolors.ENDC}")
             tested_us = 0
-            for u in us:
+            for u in us[:global_variables.max_insertion_attempts]:
                 try:
                     s0, s1 = u[0], u[1]
                     ns0, ns1 = norm(s0),norm(s1)
                     gcdss = gcd( ns0,ns1 )
-                    pip_per_svp = 16  #TODO: if we include pip, that'll be a new global variable
+                    pip_per_svp = 4 #TODO: if we include pip, that'll be a new global variable
                     ssOK = ideal(s0,s1)
                     is_OK = ssOK==ideal(K(1))
                     if verbose and gcdss!=1:
@@ -328,7 +328,7 @@ def lll_fft(
                     continue
                 break
 
-            if tested_us>= len(us):
+            if tested_us>= min( len(us), global_variables.max_insertion_attempts ):
                 num_idle_Lovacz+=1   #Nothing done, so we increase num_idle_Lovacz
                 good_blocks[i] = False
         else:

@@ -23,6 +23,7 @@ global parisizemax
 global idealaddtoone_threshold
 global sieve_threads
 global sieve_for_bkz
+global max_insertion_attempts
 
 class global_variables:
     Prec = 300                          #Precision we are storing nf_elem and nf_vect with.
@@ -46,6 +47,7 @@ class global_variables:
     bkz_max_loops = 7                  #amount of tours in BKZ algorithm called during algebraic LLL
     parisizemax = 6442713088            #amount of memory allocated by pari gp (in Bytes)
     idealaddtoone_threshold = 256
+    max_insertion_attempts = 10     #amount of times LLL tries to insert a vector after SVP 
     """
     idealaddtoone_threshold is a limit for the degree of a number field Pari GP's idealaddtoone is allowed
     to be called over. For degree 512 idealaddtoone seems to crash due to the fragmentation error and overall
@@ -55,7 +57,7 @@ class global_variables:
 
     sieve_threads = 5                   #amount of threads utilized by the BKZ
     sieve_for_bkz = "bgj1"              #the sieve that BKZ uses
-    
+
 log_bkz_abort_factor = 1.1          #log base 2 of r00 decrease required to abort bkz (applicable only with flag bkz_r00_abort)
 
 RealNumber = RealField(global_variables.Prec)
