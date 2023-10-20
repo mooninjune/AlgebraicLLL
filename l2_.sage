@@ -211,7 +211,7 @@ def lll_fft(
                     is_OK = ssOK==ideal(K(1))
                     if verbose and gcdss!=1:
                         print(f"Is O_K: {is_OK} | {str(ssOK)}")
-                    if not is_OK and not( ns0==0 or ns1==0 or log(gcdss,2) in ZZ  ) and not tested_us>pip_per_svp:
+                    if not is_OK and not( ns0==0 or ns1==0 or log(gcdss,2) in ZZ  ) and not tested_us>pip_per_svp and use_pip_solver:
                         if (debug&debug_flags.dump_gcdbad):
                             filedump = f"gcd{float(gcdss): .5f}.txt"
                             with open(filedump, 'a') as file:
