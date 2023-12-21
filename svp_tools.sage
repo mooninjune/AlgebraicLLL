@@ -1,4 +1,5 @@
 import sys
+from sys import stdout
 
 from fpylll import *
 from fpylll import BKZ as BKZ_FPYLLL
@@ -35,8 +36,13 @@ if g6k_avaliable:
     from g6k.algorithms.bkz import pump_n_jump_bkz_tour
     from g6k.utils.stats import dummy_tracer
 
-def flatter_interface( fpylllB ):
+def flatter_interface( fpylllB, do_timeout=True ):
+    """
+    If the flatter lib (https://github.com/keeganryan/flatter) is installed, outputs flatter-reduced basis of fpylllB.
+    Else returns fpylllB.
+    """
     flatter_is_installed = os.system( "flatter -h > /dev/null" ) == 0
+    n = fpylllB.nrows
 
     if flatter_is_installed:
         basis = '[' + fpylllB.__str__() + ']'
@@ -55,11 +61,16 @@ def flatter_interface( fpylllB ):
         command = ["flatter", filename]
         try:
             # Run the command and capture its output
+            alarm( int(n) ) #flatter can freeze
             out = subprocess.check_output(command, text=True, stderr=subprocess.STDOUT)
+            cancel_alarm()
             # Process the output as needed
         except subprocess.CalledProcessError as e:
             # Handle any errors, e.g., print the error message
             print(f"Error: {e.returncode} - {e.output}")
+            return fpylllB
+        except AlarmInterrupt as e:
+            print( "flatter interrupted!" )
             return fpylllB
 
         elements = out.split()
@@ -96,12 +107,14 @@ def pip_solver( a,b,seed=None ):  #if aOK+bOK is principal, finds g: gOK = aOK+b
 
     g = []
     I = ideal(a,b)
+    print(a, ", ", b)
+    stdout.flush()
     if d < 32: #if the field is small enough, we can solve PIP manually
         g = I.gens_reduced( proof=False )
-    elif d in [32,64]:   #if we managed to compute bnfinit for a certain fields, we just solve it with sage
+    elif d in [32]:   # 64 if we managed to compute bnfinit for a certain fields, we just solve it with sage
         filename = f"f{2*d}bnf.pkl"
         print(f"Reading {filename}")
-        pari( r"\p 58" )
+        pari( r"\p 100" )
         with open( filename, "rb" ) as file_:
             K._pari_bnf = pickle.load( file_ )
         I._pari_bnf = K._pari_bnf

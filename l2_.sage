@@ -150,7 +150,7 @@ def lll_fft(
             G.size_reduce(FI,B,U, start=i+1, end=i+2,debug=debug)
             btmp = B[i+1] - sum( G.Mu[i+1][k]*B_star[k] for k in range(i) )
 
-            save_norm = log( G.Rr[i][i].alg_norm(),2 ) / 2
+            save_norm = log( G.Rr[i][i].alg_norm(),2 )
 
             # 2 X n projected matrix
             M = [
@@ -203,6 +203,7 @@ def lll_fft(
             tested_us = 0
             for u in us[:global_variables.max_insertion_attempts]:
                 try:
+                    stdout.flush()
                     s0, s1 = u[0], u[1]
                     ns0, ns1 = norm(s0),norm(s1)
                     gcdss = gcd( ns0,ns1 )
