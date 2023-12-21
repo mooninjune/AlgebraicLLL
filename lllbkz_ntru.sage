@@ -83,11 +83,6 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),beta=4,seed=randrange(2^32
     """
     returns q, gamma_lll, gamma_bkz, lll_time, bkz_time, bool lll_dsd, int bkz_dsd
     """
-    path = "lllbkz_folder/"
-    isExist = os.path.exists(path)
-    if not isExist:
-       # Create a new directory because it does not exist
-       os.makedirs(path)
 
     filename = f"lllbkz_folder/LLLBKZ_f{f}_q{q}_b{beta}_seed{seed}.txt"
     print( f"Seed: {seed} launched.")
@@ -151,10 +146,10 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),beta=4,seed=randrange(2^32
                 bkz_obj = BKZReduction(G)
                 thenbkz = perf_counter()
                 DSD_BKZ = None
-                for beta_counter in range(4,beta+1,2):
+                for beta_counter in range(4,beta+1,1):
                     then = perf_counter()
                     par = BKZ_FPYLLL.Param(beta_counter,
-                                               max_loops=14,
+                                               max_loops=10,
                                                strategies=BKZ_FPYLLL.DEFAULT_STRATEGY,
                                                flags=flags
                                                )
@@ -229,6 +224,12 @@ def process_output( output ):
     time.sleep( float(0.02) )  #give a time for the program to dump everything to the disc
 
 # - - - f=128 - - -
+
+path = "lllbkz_folder/"
+isExist = os.path.exists(path)
+if not isExist:
+   # Create a new directory because it does not exist
+   os.makedirs(path)
 
 nthreads = 15
 tests_per_q = 20

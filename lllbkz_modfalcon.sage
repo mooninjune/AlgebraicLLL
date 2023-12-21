@@ -45,7 +45,10 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
                     Bfg[i,j+1] = -fi[j]
             Bfg = embed_Q(Bfg)
             Bfg = IntegerMatrix.from_matrix( Bfg.change_ring( ZZ ) )
-            Gfg = GSO.Mat( Bfg, float_type="dd" )
+            try:
+                Gfg = GSO.Mat( Bfg, float_type="dd" )
+            except:
+                Gfg = GSO.Mat( Bfg, float_type="mpfr" )
             Gfg.update_gso()
 
             gsnorm = ( q^(1/(1+k)) ).n(80)
