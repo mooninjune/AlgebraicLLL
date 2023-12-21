@@ -59,7 +59,7 @@ def ntru_experiment( f=512,q=next_prime(ceil(2^16.98)),beta=40,descend_number=0,
         try:
             os.makedirs(path)
         except:
-            pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception. 
+            pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
 
     try:
         strq = str(q) if q<10**14 else str(q.n(40)) #filename overflow fix
@@ -203,7 +203,7 @@ def process_output( output ):
 
     time.sleep( float(0.02) )  #give a time for the program to dump everything to the disc
 
-nthreads = 20
+nthreads = 15
 tests_per_q = 20
 dump_public_key = False
 
@@ -242,7 +242,7 @@ print("NTRU 128 Done")
 # - - - NTRU 256
 
 f=256
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [11.7,11.8,11.9,12.0,12.1,12.2,12.3,12.4] ] * tests_per_q
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [13.0+i*0.1 for i in range(6)] ] * tests_per_q
 beta=40
 first_block_beta = 46
 
@@ -270,9 +270,9 @@ print("NTRU 256 Done")
 # - - - NTRU 512
 
 f=512
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [16.8,16.9,17.0,17.1,17.2,17.3] ] * tests_per_q
-beta=38
-first_block_beta = 46
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [17.0 + 0.1*i for i in range(6)] ] * tests_per_q
+beta=40
+first_block_beta = 50
 
 output = []
 pool = Pool(processes = nthreads )

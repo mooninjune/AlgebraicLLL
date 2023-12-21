@@ -134,14 +134,14 @@ def run_experiment( conductor,q,k,manual_descend=0, beta=35, seed=0 ):
                 if manual_descend:
                     B = descend_L( B,manual_descend )
 
-                if seed == 0:
-                    print("Dump bad lattice")
-                    with open( "badlat.txt", "wb" ) as file_:
-                        pickle.dump( B, file_ )
+                # if seed == 0:
+                #     print("Dump bad lattice")
+                #     with open( "badlat.txt", "wb" ) as file_:
+                #         pickle.dump( B, file_ )
 
                 lllpar = LLL_params.overstretched_NTRU( 2*d,q,descend_number=0, beta=beta )
                 lllpar["debug"] = debug_flags.verbose_anomalies #|debug_flags.dump_gcdbad
-                global_variables.log_basis_degradation_factor = 1440.0
+                global_variables.log_basis_degradation_factor = 144.0
 
                 lll = L2(B, strategy=lllpar)
                 then = perf_counter()
@@ -197,11 +197,11 @@ def process_output( output ):
         print( f"{key}: {mean(d[key][0])}, {mean(d[key][1])}, {mean(d[key][2])}, {d[key][3]} " )
 
 
-nthreads = 2
-tests_per_q = 1
+nthreads = 15
+tests_per_q = 20
 
 k=2
-qs = [ next_prime(round(2**p)) for p in [12.0,12.5] ] * tests_per_q
+qs = [ next_prime(round(2**p)) for p in [12.0+0.2*i for i in range(1)] ] * tests_per_q
 f=128
 manual_descend = 0
 beta=45
@@ -227,29 +227,30 @@ process_output( output )
 
 sys.stdout.flush()
 
-# k=3
+# - - - k=3 - - -
 
-# qs = [ next_prime(round(2**p)) for p in [20.0, 22.0] ] * tests_per_q  #[ 2**16.2, 2**16.5, 2**16.8, 2**17.1, 2**17.4, 2**17.7, 2**18.0 ]
-# f=128
-# k=3
-# beta=42
-# manual_descend = 0
-#
-# output = []
-# pool = Pool(processes = nthreads )
-# tasks = []
-#
-# seed = 0
-#
-# print( f"f={f}, qs={qs}, k={k}" )
-# for q in qs:
-#     tasks.append( pool.apply_async(
-#     run_experiment, (f,q,k,manual_descend,beta,seed)
-#     ) )
-#     seed += 1
-#
-# for t in tasks:
-#     output.append( t.get() )
-#
-# pool.close() #closing processes in order to avoid crashing
-# process_output( output )
+k=3
+qs = [ next_prime(round(2**p)) for p in [20.0+i for i in range(5)] ] * tests_per_q
+f=128
+k=3
+beta=40
+manual_descend = 0
+
+output = []
+pool = Pool(processes = nthreads )
+tasks = []
+
+seed = 0
+
+print( f"f={f}, qs={qs}, k={k}" )
+for q in qs:
+    tasks.append( pool.apply_async(
+    run_experiment, (f,q,k,manual_descend,beta,seed)
+    ) )
+    seed += 1
+
+for t in tasks:
+    output.append( t.get() )
+
+pool.close() #closing processes in order to avoid crashing
+process_output( output )

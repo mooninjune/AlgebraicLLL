@@ -228,14 +228,81 @@ def process_output( output ):
 
     time.sleep( float(0.02) )  #give a time for the program to dump everything to the disc
 
+# - - - f=128 - - -
 
-nthreads = 4
-tests_per_q = 3
+nthreads = 15
+tests_per_q = 20
+dump_public_key = False
+
+f=128
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [9.0+i*0.5 for i in range(3)] ] * tests_per_q
+beta=40
+
+output = []
+pool = Pool(processes = nthreads )
+tasks = []
+
+i=0
+init_seed = 0
+print( f"Launching {len(qs)} experiments on {nthreads} threads." )
+print( f"f={f}, qs={qs}, beta={beta}" )
+for q in qs:
+    tasks.append( pool.apply_async(
+    run_experiment, (f,q,beta,init_seed)
+    ) )
+    init_seed += 1
+
+for t in tasks:
+    o = t.get()
+    if not o is None:
+        output.append( o )
+
+pool.close() #closing processes in order to avoid crashing
+
+print( process_output(output) )
+
+# - - - f=256 - - -
+
+nthreads = 15
+tests_per_q = 20
 dump_public_key = False
 
 f=256
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [12.0,13.0] ] * tests_per_q
-beta=36
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [13.0+i*0.1 for i in range(6)] ] * tests_per_q
+beta=40
+
+output = []
+pool = Pool(processes = nthreads )
+tasks = []
+
+i=0
+init_seed = 0
+print( f"Launching {len(qs)} experiments on {nthreads} threads." )
+print( f"f={f}, qs={qs}, beta={beta}" )
+for q in qs:
+    tasks.append( pool.apply_async(
+    run_experiment, (f,q,beta,init_seed)
+    ) )
+    init_seed += 1
+
+for t in tasks:
+    o = t.get()
+    if not o is None:
+        output.append( o )
+
+pool.close() #closing processes in order to avoid crashing
+
+print( process_output(output) )
+
+# - - - f=512 - - -
+
+nthreads = 15
+tests_per_q = 20
+dump_public_key = False
+
+f=512
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [17.0+i*0.1 for i in range(6)] ] * tests_per_q
+beta=50
 
 output = []
 pool = Pool(processes = nthreads )

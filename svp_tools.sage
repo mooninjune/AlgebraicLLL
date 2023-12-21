@@ -45,6 +45,8 @@ def flatter_interface( fpylllB, do_timeout=True ):
     n = fpylllB.nrows
 
     if flatter_is_installed:
+        if sum( cc**2 for cc in fpylllB[0] ) > 2 * sum( cc**2 for cc in fpylllB[n-1] ): #if last vector is much shorter than the first one, flatter might fail
+            fpylllB.swap_rows( 0, n-1 ) #so we swap those
         basis = '[' + fpylllB.__str__() + ']'
         seed = randrange(2**32)
         filename = f"lat{seed}.txt"
@@ -61,17 +63,18 @@ def flatter_interface( fpylllB, do_timeout=True ):
         command = ["flatter", filename]
         try:
             # Run the command and capture its output
-            alarm( int(n) ) #flatter can freeze
+            # alarm( int(n) ) #flatter can freeze
             out = subprocess.check_output(command, text=True, stderr=subprocess.STDOUT)
-            cancel_alarm()
+            # cancel_alarm()
             # Process the output as needed
         except subprocess.CalledProcessError as e:
             # Handle any errors, e.g., print the error message
+            os.remove( filename )
             print(f"Error: {e.returncode} - {e.output}")
             return fpylllB
-        except AlarmInterrupt as e:
-            print( "flatter interrupted!" )
-            return fpylllB
+        # except AlarmInterrupt as e:
+        #     print( "flatter interrupted!" )
+        #     return fpylllB
 
         elements = out.split()
         # Initialize an empty string to store the modified output

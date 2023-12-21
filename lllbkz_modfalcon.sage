@@ -45,7 +45,7 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
                     Bfg[i,j+1] = -fi[j]
             Bfg = embed_Q(Bfg)
             Bfg = IntegerMatrix.from_matrix( Bfg.change_ring( ZZ ) )
-            Gfg = GSO.Mat( Bfg, float_type="ld" )
+            Gfg = GSO.Mat( Bfg, float_type="dd" )
             Gfg.update_gso()
 
             gsnorm = ( q^(1/(1+k)) ).n(80)
@@ -55,9 +55,9 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
             print(f"Target norm: {targetnorm}")
 
             B_red = IntegerMatrix.from_matrix( matrix(ZZ,embed_Q( B )) )
-            if d*(k+1)<=400 and q<2^22:
+            if d*(k+1)<=250 and q<2^22:
                 G = GSO.Mat( B_red,float_type='ld' )
-            elif d*(k+1)<=768:
+            elif d*(k+1)<=500:
                 FPLLL.set_precision(144)
                 G = GSO.Mat( B_red,float_type='mpfr' )
             else:
@@ -78,7 +78,7 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
             M = lll_obj.M
             f1, g1 =  K( list(M.B[0])[:d] ), K( list(M.B[0])[d:] )
 
-            len_lll = enorm_vector_over_numfield( vector(f1,g1) )^0.5
+            len_lll = norm( vector ) #enorm_vector_over_numfield( vector(f1,g1) )^0.5
             if len_lll < gsnorm:
                 print(f"SKR event after lll: norm: {len_lll}")
                 print( f"len_lll/targetnorm, len_lll/gsnorm = {len_lll/targetnorm, len_lll/gsnorm}" )
@@ -124,15 +124,15 @@ if not isExist:
    # Create a new directory because it does not exist
    os.makedirs(path)
 
-nthreads = 10
-tests_per_q = 10 #
+nthreads = 15
+tests_per_q = 20 #
 dump_public_key = False
 
 # - - - k=2
 f=128  #the conductor of a number field
 k=2    #rank of module - 1
-qs = [ next_prime( ceil(2**tmp) ) for tmp in [13] ] * tests_per_q
-beta = 47
+qs = [ next_prime( ceil(2**tmp) ) for tmp in [12 + 0.2*i for i in range(6)] ] * tests_per_q
+beta = 50
 
 output = []
 pool = Pool(processes = nthreads )
@@ -182,8 +182,8 @@ for k in d.keys():
 
 f=128  #the conductor of a number field
 k=3    #rank of module - 1
-qs = [ next_prime( ceil(2**tmp) ) for tmp in [20] ] * tests_per_q
-beta = 47
+qs = [ next_prime( ceil(2**tmp) ) for tmp in [20+i for i in range(5)] ] * tests_per_q
+beta = 50
 
 output = []
 pool = Pool(processes = nthreads )
