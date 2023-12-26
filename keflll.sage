@@ -289,6 +289,7 @@ def BezTransform(L,Lptr,v,debug=False, use_custom_idealaddtoone=True):
     Ngcd = ZZ( gcd( Na,Nb ) )
 
     if (Ngcd & (Ngcd-1) == 0):  #if power of 2
+        print(f"pow of 2!: {Ngcd}")
         pow_of_2_elems = [                      #subset of these elements have norms 1,2,4,8,16,32 (starting with 64th CyclotomicField all of them have pow-of-2 norm)
             1,                                  #and Na or Nb is guranteed to be divisible by pow_of_2_elems[i] for i=log(Ngcd,2)
             z + 1,

@@ -206,13 +206,14 @@ def lll_fft(
                     stdout.flush()
                     s0, s1 = u[0], u[1]
                     ns0, ns1 = norm(s0),norm(s1)
-                    gcdss = gcd( ns0,ns1 )
-                    pip_per_svp = 4 #TODO: if we include pip, that'll be a new global variable
+                    gcdss = ZZ( gcd( ns0,ns1 ) )
+                    print(f"gcdss: {gcdss, gcd( ns0,ns1 )}")
+                    pip_per_svp = 14 #TODO: if we include pip, that'll be a new global variable
                     ssOK = ideal(s0,s1)
                     is_OK = ssOK==ideal(K(1))
                     if verbose and gcdss!=1:
                         print(f"Is O_K: {is_OK} | {str(ssOK)}")
-                    if not is_OK and not( ns0==0 or ns1==0 or log(gcdss,2) in ZZ  ) and not tested_us>pip_per_svp and use_pip_solver:
+                    if not is_OK and not( ns0==0 or ns1==0 or gcdss & (gcdss-1) in ZZ  ) and not tested_us>pip_per_svp and use_pip_solver:
                         if (debug&debug_flags.dump_gcdbad):
                             filedump = f"gcd{float(gcdss): .5f}.txt"
                             with open(filedump, 'a') as file:
