@@ -206,12 +206,17 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
     then =time.perf_counter()
     # Uflatter = matrix( [matrix(RR,B).solve_left(b) for b in matrix(RR,BB)] ).change_ring(ZZ) #we need Uflatter
 
-    B0, B1 = np.matrix(matrix(B).transpose()), np.matrix(matrix(BB).transpose())
-    # print(f"B0: {B0.shape} | B1: {B1.shape}")
-    Uflatter = np.linalg.lstsq( B0, B1, rcond=None )[0]
+    Uflatter = matrix(RR,B).solve_left( matrix(RR,BB) )
     Uflatter= matrix( ZZ, [
         [ round(Uflatter[i,j]) for j in range(n) ] for i in range(n)
-    ] ).transpose()
+    ] )
+
+    # this is faster, but crashes
+    # B0, B1 = np.matrix(matrix(B).transpose()), np.matrix(matrix(BB).transpose())
+    # Uflatter = np.linalg.lstsq( B0, B1, rcond=None )[0]
+    # Uflatter= matrix( ZZ, [
+    #     [ round(Uflatter[i,j]) for j in range(n) ] for i in range(n)
+    # ] ).transpose()
     # Uflatter = matrix(ZZ,Uflatter)
 
     T = GSO.Mat(B, float_type="dd")

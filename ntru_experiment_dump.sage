@@ -203,7 +203,7 @@ def process_output( output ):
 
     time.sleep( float(0.02) )  #give a time for the program to dump everything to the disc
 
-nthreads = 15
+nthreads = 20
 tests_per_q = 20
 dump_public_key = False
 
@@ -270,8 +270,8 @@ print("NTRU 256 Done")
 # - - - NTRU 512
 
 f=512
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [17.0 + 0.1*i for i in range(6)] ] * tests_per_q
-beta=40
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [17.0 + 0.4*i for i in range(6)] ] * tests_per_q
+beta= 40
 first_block_beta = 50
 
 output = []

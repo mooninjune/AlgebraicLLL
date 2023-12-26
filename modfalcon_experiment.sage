@@ -197,7 +197,7 @@ def process_output( output ):
         print( f"{key}: {mean(d[key][0])}, {mean(d[key][1])}, {mean(d[key][2])}, {d[key][3]} " )
 
 
-nthreads = 15
+nthreads = 20
 tests_per_q = 20
 
 k=2
