@@ -16,6 +16,8 @@ from copy import deepcopy
 import os
 import subprocess, re, shutil
 
+import numpy as np
+
 FPLLL.set_precision(global_variables.fplllPrec)
 
 
@@ -176,10 +178,6 @@ def pip_solver( a,b,seed=None ):  #if aOK+bOK is principal, finds g: gOK = aOK+b
     return g[0]
 
 
-    assert len(g) == 1, f"Ideal is not principal or defined over too large field. PIP cannot be solved!"
-    return g[0]
-
-
 
 def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_abort=False, force_ld=False):
     """
@@ -199,15 +197,26 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
     B = IntegerMatrix.from_matrix(B)
     Uflatter = matrix.identity(B.nrows)
 
-    print("Invoking flatter...")
-    then =time.perf_counter()
+    T = GSO.Mat(B, float_type="ld")
+    T.update_gso()
+    print(f"Invoking flatter... r00={log(T.get_r(0,0),2).n()}")
+    then = time.perf_counter()
     BB = flatter_interface(B)
     print(f"flatter done in {time.perf_counter()-then}")
     then =time.perf_counter()
-    #Uflatter = matrix( [matrix(ZZ,B).solve_left(b) for b in matrix(ZZ,BB)] ).change_ring(ZZ) #we need Uflatter
-    T = GSO.Mat(B, float_type="ld")
+    # Uflatter = matrix( [matrix(RR,B).solve_left(b) for b in matrix(RR,BB)] ).change_ring(ZZ) #we need Uflatter
+
+    B0, B1 = np.matrix(matrix(B).transpose()), np.matrix(matrix(BB).transpose())
+    # print(f"B0: {B0.shape} | B1: {B1.shape}")
+    Uflatter = np.linalg.lstsq( B0, B1, rcond=None )[0]
+    Uflatter= matrix( ZZ, [
+        [ round(Uflatter[i,j]) for j in range(n) ] for i in range(n)
+    ] ).transpose()
+    # Uflatter = matrix(ZZ,Uflatter)
+
+    T = GSO.Mat(B, float_type="dd")
     T.update_gso()
-    Uflatter = matrix( ZZ, [ [ round(t) for t in T.babai(b) ] for b in BB ] )
+    # Uflatter = matrix( ZZ, [ [ round(t) for t in T.babai(b) ] for b in BB ] )
     Uflatter = IntegerMatrix.from_matrix( Uflatter )
     print(f"flatter Uflatter done in {time.perf_counter()-then}")
     B = BB

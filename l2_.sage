@@ -198,7 +198,7 @@ def lll_fft(
                 for ii in range(4):
                     tmp = us[ii].to_number_field_round( L )
                     tmp0, tmp1 = ascend( K,tmp[:2] ), ascend( K,tmp[2:] )
-                    us[ii] =vector( [tmp0,tmp1] )
+                    us[ii] = vector( [tmp0,tmp1] )
                 print(f"{bcolors.OKGREEN}Ascend {d/2}->{d} {bcolors.ENDC}")
             tested_us = 0
             for u in us[:global_variables.max_insertion_attempts]:
@@ -227,8 +227,8 @@ def lll_fft(
                             print(f"Launching pip on gcd={gcdss}, N(a)={ns0}, N(b)={ns1}")
                             g = pip_solver( s0,s1 )  #solving pip
                             gg = nf_elem( minkowski_embedding(g) )
-                            g *= gg.get_close_unit(FI,for_sqrt=False).to_number_field_round(K) #shortening the generator
-                            nerr = pari("norm_err")
+                            # g *= gg.get_close_unit(FI,for_sqrt=False).to_number_field_round(K) #shortening the generator
+                            # nerr = pari("norm_err")
                             #print(f"DEBUG: N(g/answer)={nerr}") #printing debug info
 
                             s0, s1 = s0/g, s1/g
@@ -251,6 +251,14 @@ def lll_fft(
                     u0 = [ nf_elem(minkowski_embedding(uu)) for uu in u ]
                     vi = M[0]*u0[0] + M[1]*u0[1]
                     nvi = log(vi.alg_norm(),2)
+
+                    """
+                    DEBUG_MX = M[0].to_number_field(K), M[1].to_number_field(K)
+                    DEBUG_VC = DEBUG_MX[0]*u[0] + DEBUG_MX[1]*u[1]
+                    print( f"DEBUG: {(log((DEBUG_VC.hermitian_inner_product(DEBUG_VC)).trace(),2)/2).n(50)}" )
+                    print(f"DEBUG: m0: {log(M[0].canon_norm(),2).n(30)} m1: {log(M[1].canon_norm(),2).n(30)} vi: {log(vi.canon_norm(),2).n(30)}")
+                    """
+
                     if nvi >= global_variables.log_basis_degradation_factor+(save_norm):
                         if debug&debug_flags.verbose_anomalies:
                             print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC} with a margin {global_variables.log_basis_degradation_factor}")

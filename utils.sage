@@ -194,6 +194,8 @@ def svp_coeff(M,K, bkz_beta=14, verbose=False, bkz_r00_abort=False, bkz_DSD_tric
         U_ = bkz_reduce_ntru(M, block_size=min(60,bkz_beta), verbose=verbose, bkz_r00_abort=bkz_r00_abort)
     else:
         U_ = bkz_reduce(M, block_size=min(60,bkz_beta), verbose=verbose, bkz_r00_abort=bkz_r00_abort)
+        DEBUG_MX = U_*embed_Q(M)
+        # print( f"DEBUG: svp_coeff: {(log(norm(DEBUG_MX[0]),2)/2).n()}" )
 
     if bkz_beta>=60 and g6k_avaliable:
         M = IntegerMatrix.from_matrix( (U_*matrix(M)).change_ring(ZZ) )
