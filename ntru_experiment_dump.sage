@@ -53,14 +53,6 @@ def ntru_experiment( f=512,q=next_prime(ceil(2^16.98)),beta=40,descend_number=0,
     """
     print(f"Launching ntru_experiment with seed={seed}")
 
-    path = "ntruexp_folder/"
-    isExist = os.path.exists(path)
-    if not isExist:
-        try:
-            os.makedirs(path)
-        except:
-            pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
-
     try:
         strq = str(q) if q<10**14 else str(q.n(40)) #filename overflow fix
         filename = path + f"NTRU_f{f}_q{strq}_b{beta}_desc{descend_number}_seed{seed}.txt"
@@ -112,7 +104,7 @@ def ntru_experiment( f=512,q=next_prime(ceil(2^16.98)),beta=40,descend_number=0,
                 strat = LLL_params.overstretched_NTRU(d,q,descend_number=descend_number, beta=beta, first_block_beta=first_block_beta, early_abort_niters=early_abort_niters)
                 strat["rho"] = early_abort_niters
                 strat["rho_sub"] = 12
-                strat["debug"] = debug_flags.verbose_anomalies|debug_flags.dump_gcdbad
+                strat["debug"] = debug_flags.verbose_anomalies#|debug_flags.dump_gcdbad
                 LLL = L2( B,strat )     #LLL reducing
 
                 print(f"Running full LLL... with descend num:", strat["descend_number"])
@@ -202,6 +194,14 @@ def process_output( output ):
         print( f"{q : ^8} {d[q][0] : ^10} {d[q][1] : ^10}" + str( RR(d[q][2]/d[q][0] ) ) )
 
     time.sleep( float(0.02) )  #give a time for the program to dump everything to the disc
+
+path = "ntruexp_folder/"
+isExist = os.path.exists(path)
+if not isExist:
+    try:
+        os.makedirs(path)
+    except:
+        pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
 
 nthreads = 20
 tests_per_q = 20

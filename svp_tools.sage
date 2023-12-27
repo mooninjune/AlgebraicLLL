@@ -47,14 +47,13 @@ def flatter_interface( fpylllB, do_timeout=True ):
     n = fpylllB.nrows
 
     if flatter_is_installed:
-        if sum( cc**2 for cc in fpylllB[0] ) > 2 * sum( cc**2 for cc in fpylllB[n-1] ): #if last vector is much shorter than the first one, flatter might fail
-            fpylllB.swap_rows( 0, n-1 ) #so we swap those
+        fpylllB = IntegerMatrix.from_matrix( [ b for b in sorted(fpylllB, key= lambda t : norm(t)) ] )
         basis = '[' + fpylllB.__str__() + ']'
         seed = randrange(2**32)
         filename = f"lat{seed}.txt"
         # filename_out = f"redlat{seed}.txt"
         while os.path.exists(filename):
-            filename = f"lat{seed}_{randrange(1024)}.txt"
+            filename = f"lat{seed}_{randrange(2**20)}.txt"
         # while os.path.exists(filename_out):
         #     filename = f"redlat{seed}_{randrange(1024)}.txt"
 
@@ -62,21 +61,21 @@ def flatter_interface( fpylllB, do_timeout=True ):
             file.write( "["+fpylllB.__str__()+"]" )
 
         # out = os.system( "flatter " + filename + " > " + filename_out )
-        command = ["flatter", filename]
+        command = ["flatter", filename ]
         try:
             # Run the command and capture its output
-            # alarm( int(n) ) #flatter can freeze
+            alarm( int(2*n) ) #flatter can freeze
             out = subprocess.check_output(command, text=True, stderr=subprocess.STDOUT)
-            # cancel_alarm()
+            cancel_alarm()
             # Process the output as needed
         except subprocess.CalledProcessError as e:
             # Handle any errors, e.g., print the error message
             os.remove( filename )
             print(f"Error: {e.returncode} - {e.output}")
             return fpylllB
-        # except AlarmInterrupt as e:
-        #     print( "flatter interrupted!" )
-        #     return fpylllB
+        except AlarmInterrupt as e:
+            print( "flatter interrupted!" )
+            return fpylllB
 
         elements = out.split()
         # Initialize an empty string to store the modified output
@@ -199,7 +198,7 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
 
     T = GSO.Mat(B, float_type="ld")
     T.update_gso()
-    print(f"Invoking flatter... r00={log(T.get_r(0,0),2).n()}")
+    print(f"Invoking flatter... r00={(log(T.get_r(0,0),2)/2).n()}")
     then = time.perf_counter()
     BB = flatter_interface(B)
     print(f"flatter done in {time.perf_counter()-then}")

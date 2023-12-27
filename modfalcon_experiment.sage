@@ -121,7 +121,7 @@ def run_experiment( conductor,q,k,manual_descend=0, beta=35, seed=0 ):
                 for bfg in Bfg:
                     # print( solve_left( B, bfg ) )
                     # print( in_lattice( B, bfg, use_custom_solver=True ) )
-                    print( in_lattice( B, bfg, use_custom_solver=False ) )
+                    assert in_lattice( B, bfg, use_custom_solver=False ) , f"Dense sublattice constructed incorrectly."
                 print()
 
                 # - - - END check - - -
@@ -133,11 +133,6 @@ def run_experiment( conductor,q,k,manual_descend=0, beta=35, seed=0 ):
 
                 if manual_descend:
                     B = descend_L( B,manual_descend )
-
-                # if seed == 0:
-                #     print("Dump bad lattice")
-                #     with open( "badlat.txt", "wb" ) as file_:
-                #         pickle.dump( B, file_ )
 
                 lllpar = LLL_params.overstretched_NTRU( 2*d,q,descend_number=0, beta=beta )
                 lllpar["debug"] = debug_flags.verbose_anomalies #|debug_flags.dump_gcdbad
@@ -197,14 +192,14 @@ def process_output( output ):
         print( f"{key}: {mean(d[key][0])}, {mean(d[key][1])}, {mean(d[key][2])}, {d[key][3]} " )
 
 
-nthreads = 20
+nthreads = 25
 tests_per_q = 20
 
 k=2
-qs = [ next_prime(round(2**p)) for p in [12.0+0.2*i for i in range(1)] ] * tests_per_q
+qs = [ next_prime(round(2**p)) for p in [12.0+0.2*i for i in range(6)] ] * tests_per_q
 f=128
 manual_descend = 0
-beta=45
+beta=30
 
 output = []
 pool = Pool(processes = nthreads )
@@ -233,7 +228,7 @@ k=3
 qs = [ next_prime(round(2**p)) for p in [20.0+i for i in range(5)] ] * tests_per_q
 f=128
 k=3
-beta=40
+beta=25
 manual_descend = 0
 
 output = []

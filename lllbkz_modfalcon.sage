@@ -16,11 +16,41 @@ except ModuleNotFoundError:
 
 import numpy as np
 
-def in_lattice( G, t ):
-    w = vector( G.B.multiply_left( G.babai( t ) ) )
-    if vector(t)-w == 0:
-        return True
-    return False
+# def in_lattice( G, t ):
+#     w = vector( G.B.multiply_left( G.babai( t ) ) )
+#     if vector(t)-w == 0:
+#         return True
+#     return False
+
+def in_lattice( B,v, use_custom_solver=False ):
+    #checks if v in lattice defined by B
+    try:
+        if use_custom_solver:
+            u = solve_left( B,v )
+        else:
+            u = B.solve_left( v )
+    except ValueError:
+        return False
+
+    w = vector( [round(ww) for ww in u] )
+    if not u == w:
+        # print( f"{u} != {u-w}" )
+        return False
+
+    return True
+
+def solve_left( B, v ):
+    """
+    Replaces malfunctioning B.solve_left(v).
+    param B: matrix over QQ
+    param v: vector over QQ
+    """
+    K = B[0,0].parent()
+    d = K.degree()
+    n, m = B.nrows(), B.ncols()
+
+    u = B.solve_left( v )
+    return u
 
 def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
     filename = f"lllbkz_folder/LLLBKZ_MODFALC_f{f}_k{k}_q{q}_b{beta}_seed{seed}.txt"
@@ -36,14 +66,21 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
 
             B, F, g, h = keygen_modfalcon(K,q,k,seed,sigmaf=0.66, sigmag=0.66)
             Bfg = matrix( K,k,k+1 )  #unfinished matrix
-            gb = balancemod( K,g,q )
+            gb = g #balancemod( K,g,q )
+            # for i in range(k):
+            #     Bfg[i,0] = gb[i]
+            # for i in range(1,k):
+            #     for j in range(0,k):
+            #         fi = F[i] #balancemod( K,F[i],q )
+            #         Bfg[i,j+1] = -fi[j]
             for i in range(k):
                 Bfg[i,0] = gb[i]
-            for i in range(1,k):
-                for j in range(0,k):
-                    fi = balancemod( K,F[i],q )
-                    Bfg[i,j+1] = -fi[j]
+            for i in range(k):
+                for j in range(1,k+1):
+                    Bfg[i,j] = -F[i,j-1].lift()
+
             Bfg = embed_Q(Bfg)
+            print(f"debug: {Bfg.nrows(), Bfg.ncols()}")
             Bfg = IntegerMatrix.from_matrix( Bfg.change_ring( ZZ ) )
             try:
                 Gfg = GSO.Mat( Bfg, float_type="dd" )
@@ -58,6 +95,12 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
             print(f"Target norm: {targetnorm}")
 
             B_red = IntegerMatrix.from_matrix( matrix(ZZ,embed_Q( B )) )
+
+            i = 0
+            for b in Bfg:
+                assert in_lattice(matrix(B_red),vector(b)) , f"Dense sublattice constructed incorrectly. {i}"
+                i+=1
+
             if d*(k+1)<=250 and q<2^22:
                 G = GSO.Mat( B_red,float_type='ld' )
             elif d*(k+1)<=500:
@@ -81,7 +124,7 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
             M = lll_obj.M
             f1, g1 =  K( list(M.B[0])[:d] ), K( list(M.B[0])[d:] )
 
-            len_lll = norm( vector ) #enorm_vector_over_numfield( vector(f1,g1) )^0.5
+            len_lll = RR( norm( vector(M.B[0]) ) ) #enorm_vector_over_numfield( vector(f1,g1) )^0.5
             if len_lll < gsnorm:
                 print(f"SKR event after lll: norm: {len_lll}")
                 print( f"len_lll/targetnorm, len_lll/gsnorm = {len_lll/targetnorm, len_lll/gsnorm}" )
@@ -101,8 +144,8 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
                 print(f"BKZ done in {perf_counter()-then}; beta={beta_counter}, r_00={bkz_obj.M.get_r(0,0)**0.5}")
                 M = bkz_obj.M
                 f1, g1 =  K( list(M.B[0])[:d] ), K( list(M.B[0])[d:] )
-                len_bkz = bkz_obj.M.get_r(0,0)**0.5 #enorm_vector_over_numfield( vector(f1,g1) )^0.5
-                flag = any( [ in_lattice(Gfg,b) for b in M.B] )
+                len_bkz = RR( bkz_obj.M.get_r(0,0)**0.5 ) #enorm_vector_over_numfield( vector(f1,g1) )^0.5
+                flag = any( [ in_lattice(matrix(Gfg.B),vector(b)) for b in M.B] )
                 if len_bkz < gsnorm or flag:
                     print( f"flag: {flag}" )
                     bkz_t = perf_counter() - thenbkz
@@ -127,7 +170,7 @@ if not isExist:
    # Create a new directory because it does not exist
    os.makedirs(path)
 
-nthreads = 15
+nthreads = 20
 tests_per_q = 20 #
 dump_public_key = False
 
@@ -135,7 +178,7 @@ dump_public_key = False
 f=128  #the conductor of a number field
 k=2    #rank of module - 1
 qs = [ next_prime( ceil(2**tmp) ) for tmp in [12 + 0.2*i for i in range(6)] ] * tests_per_q
-beta = 50
+beta = 30
 
 output = []
 pool = Pool(processes = nthreads )
@@ -186,7 +229,7 @@ for k in d.keys():
 f=128  #the conductor of a number field
 k=3    #rank of module - 1
 qs = [ next_prime( ceil(2**tmp) ) for tmp in [20+i for i in range(5)] ] * tests_per_q
-beta = 50
+beta = 30
 
 output = []
 pool = Pool(processes = nthreads )
