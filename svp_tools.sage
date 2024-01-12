@@ -218,8 +218,8 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
     # ] ).transpose()
     # Uflatter = matrix(ZZ,Uflatter)
 
-    T = GSO.Mat(B, float_type="dd")
-    T.update_gso()
+    # T = GSO.Mat(B, float_type="mpfr")
+    # T.update_gso()
     # Uflatter = matrix( ZZ, [ [ round(t) for t in T.babai(b) ] for b in BB ] )
     Uflatter = IntegerMatrix.from_matrix( Uflatter )
     print(f"flatter Uflatter done in {time.perf_counter()-then}")

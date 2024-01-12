@@ -85,10 +85,10 @@ class LLL_params:
             d = f/2**(1+descend_number)
 
             if d<256 and q<=2^22:
-                LLL_params.set_precision(Prec_user=144, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=80)
+                LLL_params.set_precision(Prec_user=144, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=30)
             elif d<512 and q<=2^32:
-                LLL_params.set_precision(Prec_user=192+ceil(log(q,2)), fplllPrec_user=global_variables.mpfr_usage_threshold_prec, bkz_scaling_factor_user=110)
+                LLL_params.set_precision(Prec_user=192+ceil(log(q,2)), fplllPrec_user=global_variables.mpfr_usage_threshold_prec, bkz_scaling_factor_user=50)
             else:
-                LLL_params.set_precision(Prec_user=192+ceil(log(q,2)), fplllPrec_user=256, bkz_scaling_factor_user=144)
+                LLL_params.set_precision(Prec_user=192+ceil(log(q,2)), fplllPrec_user=256, bkz_scaling_factor_user=70)
             return LLL_params( gamma=gamma, gamma_sub=gamma_sub, early_abort_r00_decrease=early_abort_r00_decrease,
                 svp_oracle_threshold=d/2**descend_number, bkz_beta=beta )
