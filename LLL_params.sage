@@ -68,14 +68,14 @@ class LLL_params:
             # make sure bkz_scaling_factor_user is less than mpfr_usage_threshold_prec with some gap, otherwise the approxCVP on log-unit lattice in BezTransform
             # might crash
             global_variables.log_basis_degradation_factor = 60.0
-            if d<=128 and q<=2^18:
-                LLL_params.set_precision(Prec_user=144, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=50)
+            if d<=128 and q<=2**16:
+                LLL_params.set_precision(Prec_user=64, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=48)
             elif d<=256 and q<=2^32:
-                LLL_params.set_precision(Prec_user=192, fplllPrec_user=global_variables.mpfr_usage_threshold_prec, bkz_scaling_factor_user=80)
+                LLL_params.set_precision(Prec_user=192, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=80)
             else:
                 tmp = round( len(bin(q))/2 )
-                LLL_params.set_precision(Prec_user=192+tmp, fplllPrec_user=256, bkz_scaling_factor_user=160)
-            p =  LLL_params( rho=9, rho_sub=9, gamma=0.22, gamma_sub=0.19,
+                LLL_params.set_precision(Prec_user=160, fplllPrec_user=global_variables.mpfr_usage_threshold_prec+64, bkz_scaling_factor_user=72)
+            p =  LLL_params( rho=3, rho_sub=9, gamma=0.22, gamma_sub=0.19,
                 svp_oracle_threshold=d/2**descend_number, bkz_beta=beta, early_abort_niters=early_abort_niters, first_block_beta=first_block_beta,
                 debug = debug_flags.verbose_anomalies | debug_flags.verbose_summary )
             p["use_pip_solver"] = True

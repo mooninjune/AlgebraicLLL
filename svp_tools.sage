@@ -115,10 +115,10 @@ def pip_solver( a,b,seed=None ):  #if aOK+bOK is principal, finds g: gOK = aOK+b
     stdout.flush()
     if d < 32: #if the field is small enough, we can solve PIP manually
         g = I.gens_reduced( proof=False )
-    elif d in [32]:   # 64 if we managed to compute bnfinit for a certain fields, we just solve it with sage
+    elif d in [32,64]:   # 64 if we managed to compute bnfinit for a certain fields, we just solve it with sage
         filename = f"f{2*d}bnf.pkl"
         print(f"Reading {filename}")
-        pari( r"\p 100" )
+        pari( r"\p 144" )
         with open( filename, "rb" ) as file_:
             K._pari_bnf = pickle.load( file_ )
         I._pari_bnf = K._pari_bnf
@@ -198,7 +198,8 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
 
     T = GSO.Mat(B, float_type="ld")
     T.update_gso()
-    print(f"Invoking flatter... r00={(log(T.get_r(0,0),2)/2).n()}")
+    init_r00 = (log(T.get_r(0,0),2)/2).n()
+    print(f"Invoking flatter... r00={init_r00}")
     then = time.perf_counter()
     BB = flatter_interface(B)
     print(f"flatter done in {time.perf_counter()-then}")
@@ -264,17 +265,24 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
 
     then=time.perf_counter()
 
-    # block_sizes = [i for i in range(4,int(min(n,m,block_size)),2)]
-    # block_sizes += [int(min(n,block_size))]
-    block_sizes = [ i for i in range(4,min(n,m,block_size)+1) ]
+    block_size = min(n,m,block_size)
+    block_sizes = [ i for i in range(4,block_size+1,1) ]
+    if not block_size in block_sizes:
+        block_sizes += [int(min(n,block_size))]
+    # block_sizes = [ i for i in range(4,block_size+1) ]
 
     bkz = BKZReduction(GSO_M)
     sys.stdout.flush()    #flush after the LLL
 
     dsd_happened_flag = False
+    gh = gaussian_heuristic([GSO_M.get_r(i,i) for i in range(n)])
     for beta in block_sizes:    #BKZ reduce the basis
+        r00 = log( GSO_M.get_r(0,0),2 )/2
+        if init_r00 <= 0.9999 * r00 and beta>block_size//2+1 and r00 <= 1+gh:
+            print( f"BKZ is unlikely to recover short vector. Breaking." )
+            break  #avoiding launching bkz that unlikely to find sh vec
         par = BKZ_FPYLLL.Param(beta,
-                               max_loops=global_variables.bkz_max_loops,
+                               max_loops=global_variables.bkz_max_loops if beta!=block_size else (global_variables.bkz_max_loops+1),
                                flags=flags,
                                strategies=BKZ_FPYLLL.DEFAULT_STRATEGY
                                )
@@ -292,8 +300,7 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
             sys.stdout.flush()  #flush after the BKZ call
 
     if verbose:
-        gh = gaussian_heuristic([GSO_M.get_r(i,i) for i in range(n)])
-        print('gh:', log(gh), 'true len:', RRf(log(GSO_M.get_r(0,0))))
+        print('gh:', RRf(log(gh,2)/2), 'true len:', RRf(log(GSO_M.get_r(0,0),2)/2))
 
     dt=time.perf_counter()-then
 

@@ -207,7 +207,7 @@ nthreads = 4
 tests_per_q = 2
 dump_public_key = False
 
-descend_number = 0
+descend_number = 1
 manual_descend = 1
 early_abort_niters = False
 

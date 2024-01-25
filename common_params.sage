@@ -26,9 +26,9 @@ global sieve_for_bkz
 global max_insertion_attempts
 
 class global_variables:
-    Prec = 300                          #Precision we are storing nf_elem and nf_vect with.
+    Prec = 250                          #Precision we are storing nf_elem and nf_vect with.
     fplllPrec = 144                     #Fpylll's mpfr precision
-    bkz_scaling_factor = 80           #Maximum magnitude of matrix over ZZ that is allowed to be passed to fpylll BKZ (in bits). < 512
+    bkz_scaling_factor = 48           #Maximum magnitude of matrix over ZZ that is allowed to be passed to fpylll BKZ (in bits). < 512
     scale_factor_log_unit = 180         #Scale factor for Log Unit lattice if changed, one must regenerate the lattices (default: 180)
     threshold = 10^-14                  #threshold for assertions error when comparing equal values (e.g., norms)
     log_distortion = 10^-10             #bound on inaccuracy of log_unit_projection
@@ -40,14 +40,14 @@ class global_variables:
     """
     early_abort = None              #haven't decided how to implement it yet
     mpfr_usage_threshold_prec = 144      #minimal precision to start using mpfr
-    mpfr_usage_threshold_dim = 257      #minimal dimension to start using mpfr
+    mpfr_usage_threshold_dim = 385      #minimal dimension to start using mpfr
     ld_usage_threshold_prec = 80       #maximal precision for using ld
-    ld_usage_threshold_dim = 128        #maximal dimension for using ld
+    ld_usage_threshold_dim = 256 #128        #maximal dimension for using ld
 
-    bkz_max_loops = 7                  #amount of tours in BKZ algorithm called during algebraic LLL
+    bkz_max_loops = 2                  #amount of tours in BKZ algorithm called during algebraic LLL
     parisizemax = 6442713088            #amount of memory allocated by pari gp (in Bytes)
     idealaddtoone_threshold = 256
-    max_insertion_attempts = 10     #amount of times LLL tries to insert a vector after SVP 
+    max_insertion_attempts = 10     #amount of times LLL tries to insert a vector after SVP
     """
     idealaddtoone_threshold is a limit for the degree of a number field Pari GP's idealaddtoone is allowed
     to be called over. For degree 512 idealaddtoone seems to crash due to the fragmentation error and overall

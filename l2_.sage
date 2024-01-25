@@ -34,7 +34,7 @@ def dot_product(v,w):
 def lll_fft(
         B, K=None, FIs=None, rho=9, rho_sub=9, gamma=0.98, gamma_sub=0.5, bkz_beta=8, svp_oracle_threshold = 32, use_coeff_embedding=False,
         debug=0, verbose=True, early_abort_niters=False, early_abort_r00_decrease=False, dump_intermediate_basis=False, bkz_r00_abort=False,
-        use_custom_idealaddtoone=True, first_block_beta=0, use_pip_solver=False, min_runs_amount = 0, experiment_name=None):
+        use_custom_idealaddtoone=True, first_block_beta=0, use_pip_solver=False, experiment_name=None):
     """
     Perform algebraic LLL reduction à la KEF-LLL on a free algebraic module defined by the row-vectors of B.
     param B: basis of a lattice over CyclotomicField (must consist of nf_vect) in the fft domain
@@ -111,9 +111,6 @@ def lll_fft(
     good_blocks = [ True for i in range(n-1) ]  #indicates if the SVP on block i improved the basis
     #(if bkz does not improve on block i, it will not improve on it later, until the block gets updated - we set good_blocks[i]=False)
     while num_idle_Lovacz<n-1:
-        if early_abort_niters:
-            print(f"Early abort after {tour_num} iterations!")
-            break
         i=iota%(n-1)
         if i==0:
             num_idle_Lovacz = 0  #zeroize at the start of a new pass through the basis
@@ -122,12 +119,16 @@ def lll_fft(
                 print(f"Tour {tour_num} done in {perf_counter()-tour_timer}")
                 tour_timer = perf_counter()
         print(f"kef i={i} iota={iota}")
+        if early_abort_niters and iota//(n-1) >= early_abort_niters:
+            print(f"Early abort after {tour_num} iterations!")
+            break
+
 
         #we need to compute all Mu[i][:] and all Rr[i][:] along with Rr[i+1][i+1] (the latter to check Lovasz’ condition) that's why end = i+2
         #end could be i+1, but then in "if log_t0>=log_t1_  and good_blocks[i]": we need to compute log_t1_
         G.compute_GSO(start=i, end=i+2)
         G.unit_reduce( FI,B,U, start=i, end=i+1, debug=debug )
-        G.size_reduce( FI,B,U,start=i,end=i+1, debug=debug )  #this updates U
+        G.size_reduce( FI,B,U, start=i, end=i+1, debug=debug )  #this updates U
         t0, t1 = abs( G.Rr[i][i].alg_norm() ) , abs( G.Rr[i+1][i+1].alg_norm() )
 
         log_t0 = log(t0.n(),2)
@@ -213,7 +214,9 @@ def lll_fft(
                     is_OK = ssOK==ideal(K(1))
                     if verbose and gcdss!=1:
                         print(f"Is O_K: {is_OK} | {str(ssOK)}")
-                    if not is_OK and not( ns0==0 or ns1==0 or gcdss & (gcdss-1) in ZZ  ) and not tested_us>pip_per_svp and use_pip_solver:
+                    print( f"{(not is_OK , not( ns0==0 or ns1==0 or (gcdss & (gcdss-1))!=0  ) , not tested_us>pip_per_svp , use_pip_solver)}" )
+                    print( f"{ns0==0 , ns1==0 , (gcdss & (gcdss-1))==0}" )
+                    if not is_OK and not( ns0==0 or ns1==0 or (gcdss & (gcdss-1))==0  ) and not tested_us>pip_per_svp and use_pip_solver:
                         if (debug&debug_flags.dump_gcdbad):
                             filedump = f"gcd{float(gcdss): .5f}.txt"
                             with open(filedump, 'a') as file:
@@ -225,8 +228,9 @@ def lll_fft(
                         g = None
                         try:
                             print(f"Launching pip on gcd={gcdss}, N(a)={ns0}, N(b)={ns1}")
+                            stdout.flush()
                             g = pip_solver( s0,s1 )  #solving pip
-                            gg = nf_elem( minkowski_embedding(g) )
+                            # gg = nf_elem( minkowski_embedding(g) )
                             # g *= gg.get_close_unit(FI,for_sqrt=False).to_number_field_round(K) #shortening the generator
                             # nerr = pari("norm_err")
                             #print(f"DEBUG: N(g/answer)={nerr}") #printing debug info
@@ -252,13 +256,6 @@ def lll_fft(
                     vi = M[0]*u0[0] + M[1]*u0[1]
                     nvi = log(vi.alg_norm(),2)
 
-                    """
-                    DEBUG_MX = M[0].to_number_field(K), M[1].to_number_field(K)
-                    DEBUG_VC = DEBUG_MX[0]*u[0] + DEBUG_MX[1]*u[1]
-                    print( f"DEBUG: {(log((DEBUG_VC.hermitian_inner_product(DEBUG_VC)).trace(),2)/2).n(50)}" )
-                    print(f"DEBUG: m0: {log(M[0].canon_norm(),2).n(30)} m1: {log(M[1].canon_norm(),2).n(30)} vi: {log(vi.canon_norm(),2).n(30)}")
-                    """
-
                     if nvi >= global_variables.log_basis_degradation_factor+(save_norm):
                         if debug&debug_flags.verbose_anomalies:
                             print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC} with a margin {global_variables.log_basis_degradation_factor}")
@@ -281,13 +278,14 @@ def lll_fft(
                     u0, u1 = [ nf_elem(minkowski_embedding(uu)) for uu in U_[0] ], [ nf_elem(minkowski_embedding(uu)) for uu in U_[1] ]
 
                     #save changes
-                    # vi = M[0]*u0[0] + M[1]*u0[1]
-                    # nvi = log(vi.alg_norm(),2)
-                    # if nvi >= global_variables.log_basis_degradation_factor+abs(save_norm):
-                    #     if debug&debug_flags.verbose_anomalies:
-                    #         print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC}")
-                    #     tested_us+=1
-                    #     continue
+                    vi = M[0]*u0[0] + M[1]*u0[1]
+                    nvi = log(vi.alg_norm(),2)
+                    if nvi >= global_variables.log_basis_degradation_factor+abs(save_norm):
+                        if debug&debug_flags.verbose_anomalies:
+                            print(f"{bcolors.FAIL} Ayyy, Caramba! {nvi.n(50)} >= {save_norm.n(50)}{bcolors.ENDC}")
+                        tested_us+=1
+                        continue
+
                     b     = B[i]
                     B[i]  = u0[0]*B[i]+u0[1]*B[i+1]
                     B[i+1]= u1[0]*b+u1[1]*B[i+1]
@@ -298,21 +296,15 @@ def lll_fft(
 
                     # - - -
                     G.update_after_svp_oracle_rank_2([u0,u1],i)
-                    G.compute_GSO(start=i, end=i+1) #we update Mu and GS-vectors for the i-th basis vector
+                    # G.compute_GSO(start=i, end=i+2) #we update Mu and GS-vectors for the i-th basis vector
                     G.size_reduce( FI,B,U,start=i,end=i+1 )  #we size reduce i-th basis vector, we assume, the unit_reduce is not needed since we've called the SVP oracle
                     B_star[i] = B[i] - sum( G.Mu[i][k]*B_star[k] for k in range(i) )
 
                     npre = save_norm.n(50)
-                    #npost = log(G.Rr[i][i].alg_norm(),2).n(50)
-
-                    #print( f"deboogie-woogie: {nvi}, {npost}" )
                     if nvi <= npre-global_variables.log_basis_degradation_factor:
                         print(f"{bcolors.OKGREEN}Something done, norm Rr[{i},{i}]: {npre}- - ->{nvi.n(50)}{bcolors.ENDC}")
                         if early_abort_r00_decrease and i==0:
                             print("early_abort_r00_decrease triggered")
-                    # elif npost >= npre+global_variables.log_basis_degradation_factor:    #normally shouldn't be triggered at all
-                    #     print(f"{bcolors.FAIL}Something bad done, norm Rr[{i},{i}]: {npre}- - ->{npost}{bcolors.ENDC}")
-                    #     num_idle_Lovacz+=1   #Little to nothing done, so we increase num_idle_Lovacz
                     else:
                         print(f"{bcolors.WARNING}Little to nothing done, norm Rr[{i},{i}]: {npre}- - ->{nvi.n(50)}{bcolors.ENDC}")
                         num_idle_Lovacz+=1   #Nothing done, so we increase num_idle_Lovacz
@@ -349,8 +341,7 @@ def lll_fft(
             ak = new_alg_profile[0]-new_alg_profile[1]
             logg = (ak/2 - d*(log(d,2)+1)) / (2*d)
             print(f"Gamma required to trigger non-Lovasz condition again is: {(2^logg).n()}")
-        if iota < min_runs_amount*(n-1):
-            num_idle_Lovacz=0
+
         if i==n-2:
             if dump_intermediate_basis:
                 with open(filename, "wb") as f:
@@ -369,9 +360,9 @@ def lll_fft(
     Since we may not finish the last tour (if the short vector is found by svp call somewhere at the begining of the basis) in order
     to save a few approxSVP calls, we size and unit reduce all the consequent vectors to make them shorter.
     """
-    G.compute_GSO(start=i+1, end=n)
-    G.unit_reduce(FI,B,U, start=i+1,end=n,debug=debug)
-    G.size_reduce( FI,B,U,start=min(i+1,n-1),end=n,debug=debug )  #we size reduce them
+    G.compute_GSO(start=n-1, end=n)
+    G.unit_reduce(FI,B,U, start=n-1,end=n,debug=debug)
+    G.size_reduce( FI,B,U,start=n-1,end=n,debug=debug )  #we size reduce them
 
     U = [x for _, x in sorted(zip(B,U), key=lambda pair: (pair[0].alg_norm()).n())] #we sort the basis according to the Euclidean length
 

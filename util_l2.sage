@@ -511,7 +511,7 @@ class GSO_obj: #checked
         u0_ = ( u0[0].conjugate(), u0[1].conjugate() )
         u1_ = ( u1[0].conjugate(), u1[1].conjugate() )
         g2_ = g2.conjugate()
-        # the rest is dealt with with similar formulas (see overleaf)
+        # the rest is dealt with with similar formulas
         self.G[i][i] =      u0[0]*u0_[0]*g0 + u0[0]*u0_[1]*g2_+u0[1]*u0_[0]*g2+u0[1]*u0_[1]*g1
         self.G[i+1][i+1] =  u1[0]*u1_[0]*g0 + u1[0]*u1_[1]*g2_+u1[1]*u1_[0]*g2+u1[1]*u1_[1]*g1
         self.G[i+1][i] =    u1[0]*u0_[0]*g0 + u1[0]*u0_[1]*g2_+u1[1]*u0_[0]*g2+u1[1]*u0_[1]*g1
