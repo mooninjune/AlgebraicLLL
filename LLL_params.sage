@@ -69,13 +69,14 @@ class LLL_params:
             # might crash
             global_variables.log_basis_degradation_factor = 60.0
             if d<=128 and q<=2**16:
-                LLL_params.set_precision(Prec_user=64, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=48)
-            elif d<=256 and q<=2^32:
-                LLL_params.set_precision(Prec_user=192, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=80)
+                LLL_params.set_precision(Prec_user=96, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=50)
+            elif d<=256 and q<=2**32:
+                LLL_params.set_precision(Prec_user=150, fplllPrec_user=global_variables.mpfr_usage_threshold_prec, bkz_scaling_factor_user=80)
             else:
                 tmp = round( len(bin(q))/2 )
                 LLL_params.set_precision(Prec_user=160, fplllPrec_user=global_variables.mpfr_usage_threshold_prec+64, bkz_scaling_factor_user=72)
-            p =  LLL_params( rho=3, rho_sub=9, gamma=0.22, gamma_sub=0.19,
+            #gamma=0.22,
+            p =  LLL_params( rho=3, rho_sub=9, gamma=0.52, gamma_sub=0.19,
                 svp_oracle_threshold=d/2**descend_number, bkz_beta=beta, early_abort_niters=early_abort_niters, first_block_beta=first_block_beta,
                 debug = debug_flags.verbose_anomalies | debug_flags.verbose_summary )
             p["use_pip_solver"] = True
@@ -87,8 +88,8 @@ class LLL_params:
             if d<256 and q<=2^22:
                 LLL_params.set_precision(Prec_user=144, fplllPrec_user=global_variables.ld_usage_threshold_prec, bkz_scaling_factor_user=30)
             elif d<512 and q<=2^32:
-                LLL_params.set_precision(Prec_user=192+ceil(log(q,2)), fplllPrec_user=global_variables.mpfr_usage_threshold_prec, bkz_scaling_factor_user=50)
+                LLL_params.set_precision(Prec_user=192+round(log(q,2)), fplllPrec_user=global_variables.mpfr_usage_threshold_prec, bkz_scaling_factor_user=50)
             else:
-                LLL_params.set_precision(Prec_user=192+ceil(log(q,2)), fplllPrec_user=256, bkz_scaling_factor_user=70)
+                LLL_params.set_precision(Prec_user=192+round(log(q,2)), fplllPrec_user=256, bkz_scaling_factor_user=70)
             return LLL_params( gamma=gamma, gamma_sub=gamma_sub, early_abort_r00_decrease=early_abort_r00_decrease,
                 svp_oracle_threshold=d/2**descend_number, bkz_beta=beta )
