@@ -1,9 +1,10 @@
 # Practical Algebraic LLL Reduction Algorithm For Free Modules over Cyclotomic Fields of Power-of-two Conductor
-
-This repository contains the framework that reduces algebraic lattices defined over power-of-2 cyclotomic fields. It contains the implementation of an algebraic LLL algorithm described in the article "**Practical Algebraic LLL for Free Modules over Cyclotomic Fields of Power-of-two Conductor**".
-
+This repository contains the framework that reduces algebraic lattices defined over power-of-2 cyclotomic fields. It contains the implementation of an algebraic LLL algorithm described in the article "**Finding Dense Submodules with Algebraic Lattice Reduction**" - Alexander Karenin and Elena Kirshanova.
+## Acknowledgment
+Both authors are affiliated with:
+- Cryptography Research Center, Technology Innovation Institute, Abu Dhabi, UAE
+- I.Kant Baltic Federal University, Kaliningrad, Russia
 # Requirements
-
  - [SageMath 9.8+](https://www.sagemath.org/)
  - Optionally install `multiprocess` by running `pip install multiprocess` in sage session. This would allow Mac users to run the code.
  - Optionally update the FPYLLL in sage so that it supports qd. See: **Manual update of fpylll and fplll inside Sagemath 9.0+** in  [fpylll](https://github.com/fplll/fpylll).
@@ -35,7 +36,6 @@ EUROCRYPT 2017, pages 60–88, 2017
 [dBDPMW20] - Koen de Boer, L´eo Ducas, Alice Pellet-Mary, and Benjamin Wesolowski.
 Random self-reducibility of ideal-SVP via Arakelov random walks. In
 Advances in Cryptology - CRYPTO 2020, pages 243–273, 2020
-
 # How to use
 Run `build.sh` in the downloaded directory. This will build all the necessary files.
 
@@ -58,7 +58,6 @@ To generate a test 2x3 matrix `B` over 64-th cyclotomic field and LLL reduce it,
 
 	B_red = lllobj.B
 The result will be stored in `B_red`.
-
 # Experiments
 To run the experiments from Section 5.1, type:
 
