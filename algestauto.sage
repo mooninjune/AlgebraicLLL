@@ -37,7 +37,7 @@ def ZGSA( n, d, q, lgab, base=2 ):
 my_import("profile_tests")
 
 nthreads = 8
-tests_per_q =
+tests_per_q = 20
 dump_public_key = False
 
 # - - - f=small
@@ -87,6 +87,6 @@ for q in list(set(qs)):
     print( f"PT vol: {sum( sorted(r)[:dense_dim] ).n()}" )
 
     l = qprof( n, d, q )
-    P = list_plot( data, color = "blue",legend_label="Practice",plotjoined=True, figsize=11) + list_plot(r, color = "red", legend_label="AZGSA",plotjoined=True) + list_plot(l, color = "brown", legend_label="Initial",plotjoined=True)
+    P = list_plot( data, color = "blue",legend_label="Practice",plotjoined=True, figsize=11, axes_labels=['$i$', '$\sqrt{r_{i,i}}$') + list_plot(r, color = "red", legend_label="AZGSA",plotjoined=True) + list_plot(l, color = "brown", legend_label="Initial",plotjoined=True)
 
     P.save_image( f'{f}_({q}, {tests_per_q-1})_profilecompare.png' )
