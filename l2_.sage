@@ -469,49 +469,51 @@ class L2:
         param strategy: LLL_params object.
         param modify_basis: if True, we update self.B
         """
+        with warnings.catch_warnings(record=True) as wrn:
+            warnings.simplefilter('once') #only one warning
 
-        if strategy is None:
-            strategy=self.strategy
+            if strategy is None:
+                strategy=self.strategy
 
-        if self.strategy["verbose"]:
-            now = datetime.now()    #algorithm can work days on 1024-th field. It's nice to have info when we started.
-            nowstr = now.strftime("%Y-%m-%d %H:%M:%S")
+            if self.strategy["verbose"]:
+                now = datetime.now()    #algorithm can work days on 1024-th field. It's nice to have info when we started.
+                nowstr = now.strftime("%Y-%m-%d %H:%M:%S")
 
-            print('------ LLL parameters summary ------')
-            print(f"{bcolors.OKCYAN}{nowstr}{bcolors.ENDC} LLL is launched on a module of rank {self.nrows}")
-            if strategy["use_coeff_embedding"]: print('LLL uses coefficient embedding')
-            else: print('LLL uses canonical embedding')
+                print('------ LLL parameters summary ------')
+                print(f"{bcolors.OKCYAN}{nowstr}{bcolors.ENDC} LLL is launched on a module of rank {self.nrows}")
+                if strategy["use_coeff_embedding"]: print('LLL uses coefficient embedding')
+                else: print('LLL uses canonical embedding')
 
-            if strategy["use_custom_idealaddtoone"]: print('LLL uses custom idealaddtoone')
-            else: print('LLL uses custom idealaddtoone')
-            print('Does LLL use early abort if R[0,0] reduced by a factor', log_bkz_abort_factor, '?:', strategy["bkz_r00_abort"])
+                if strategy["use_custom_idealaddtoone"]: print('LLL uses custom idealaddtoone')
+                else: print('LLL uses custom idealaddtoone')
+                print('Does LLL use early abort if R[0,0] reduced by a factor', log_bkz_abort_factor, '?:', strategy["bkz_r00_abort"])
 
-            print('LLL uses gamma=', strategy["gamma"], 'to check Lovàsz condition in non-recursive calls ')
-            print('LLL uses gamma_sub = ', strategy["gamma_sub"], 'to check Lovàsz condition in all recursive calls ')
-            print('-----------------------------------')
+                print('LLL uses gamma=', strategy["gamma"], 'to check Lovàsz condition in non-recursive calls ')
+                print('LLL uses gamma_sub = ', strategy["gamma_sub"], 'to check Lovàsz condition in all recursive calls ')
+                print('-----------------------------------')
 
 
-        # Main call to lll_fft. The basis should be in the fft domain
-        B_ = [ nf_vect( [minkowski_embedding(bij) for bij in self.B[i]] ) for i in range(self.nrows) ]
-        U = lll_fft(
-                B_, self.K, FIs=self.FieldInfoDict,
-                rho=strategy["rho"], rho_sub=strategy["rho_sub"], gamma=strategy["gamma"], gamma_sub=strategy["gamma_sub"],
-                bkz_beta=strategy["bkz_beta"], svp_oracle_threshold = strategy["svp_oracle_threshold"],
-                use_coeff_embedding=strategy["use_coeff_embedding"], debug=strategy["debug"], verbose=strategy["verbose"],
-                early_abort_niters=strategy["early_abort_niters"], early_abort_r00_decrease=strategy["early_abort_r00_decrease"],
-                dump_intermediate_basis=strategy["dump_intermediate_basis"], bkz_r00_abort=strategy["bkz_r00_abort"],
-                use_custom_idealaddtoone=strategy["use_custom_idealaddtoone"], first_block_beta=strategy["first_block_beta"], use_pip_solver=strategy["use_pip_solver"],
-                experiment_name=strategy["experiment_name"]
-            )
+            # Main call to lll_fft. The basis should be in the fft domain
+            B_ = [ nf_vect( [minkowski_embedding(bij) for bij in self.B[i]] ) for i in range(self.nrows) ]
+            U = lll_fft(
+                    B_, self.K, FIs=self.FieldInfoDict,
+                    rho=strategy["rho"], rho_sub=strategy["rho_sub"], gamma=strategy["gamma"], gamma_sub=strategy["gamma_sub"],
+                    bkz_beta=strategy["bkz_beta"], svp_oracle_threshold = strategy["svp_oracle_threshold"],
+                    use_coeff_embedding=strategy["use_coeff_embedding"], debug=strategy["debug"], verbose=strategy["verbose"],
+                    early_abort_niters=strategy["early_abort_niters"], early_abort_r00_decrease=strategy["early_abort_r00_decrease"],
+                    dump_intermediate_basis=strategy["dump_intermediate_basis"], bkz_r00_abort=strategy["bkz_r00_abort"],
+                    use_custom_idealaddtoone=strategy["use_custom_idealaddtoone"], first_block_beta=strategy["first_block_beta"], use_pip_solver=strategy["use_pip_solver"],
+                    experiment_name=strategy["experiment_name"]
+                )
 
-        U = matrix( [
-            u.to_number_field_round(self.K) for u in U
-        ] )
+            U = matrix( [
+                u.to_number_field_round(self.K) for u in U
+            ] )
 
-        print( "We are finished with det U:", norm(det(U)) )
+            print( "We are finished with det U:", norm(det(U)) )
 
-        if modify_basis:
-            self.B = matrix([ [dot_product(U[i],self.B.column(j)) for j in range(self.ncols)] for i in range(self.nrows) ])
+            if modify_basis:
+                self.B = matrix([ [dot_product(U[i],self.B.column(j)) for j in range(self.ncols)] for i in range(self.nrows) ])
 
         return matrix(self.K,U)
 

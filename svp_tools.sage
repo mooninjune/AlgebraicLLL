@@ -15,6 +15,7 @@ from common_params import *
 from copy import deepcopy
 import os
 import subprocess, re, shutil
+import warnings
 
 import numpy as np
 
@@ -66,6 +67,7 @@ def flatter_interface( fpylllB, do_timeout=True ):
             # Run the command and capture its output
             alarm( int(2*n) ) #flatter can freeze
             out = subprocess.check_output(command, text=True, stderr=subprocess.STDOUT)
+            warnings.warn('Test warning', RuntimeWarning)
             cancel_alarm()
             # Process the output as needed
         except subprocess.CalledProcessError as e:

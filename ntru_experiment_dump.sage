@@ -5,6 +5,7 @@ from l2_ import *
 
 from gen_lat import gen_ntru_instance
 import contextlib
+import warnings
 
 try:
     from multiprocess import Pool  # you might need pip install multiprocess
@@ -166,7 +167,7 @@ def process_output( output ):
         if isinstance( output[i], Exception ):
             output.pop(i)
         i+=1
-    if i>0:
+    if len(output)>0:
         print(f"{i} experiments omitted due to the problems.")
 
     output = [ (x, a,b ) for x,a,b in sorted(output, key=lambda triple: (triple[0])) ]
@@ -203,20 +204,20 @@ if not isExist:
     except:
         pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
 
-nthreads = 4
-tests_per_q = 2
+nthreads = 8
+tests_per_q = 3
 dump_public_key = False
 
-descend_number = 1
+descend_number = 0
 manual_descend = 1
 early_abort_niters = False
 
 # - - - NTRU 128
 
-f=128
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [9.0,9.5,10.0] ] * tests_per_q
-beta=20
-first_block_beta = 25
+f=64
+qs = [ next_prime( ceil(2^tmp) ) for tmp in [10.2+i*0.7 for i in range(3)] ] * tests_per_q
+beta=22
+first_block_beta = 20
 
 output = []
 pool = Pool(processes = nthreads )
