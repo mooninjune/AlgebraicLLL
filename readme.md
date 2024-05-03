@@ -27,6 +27,7 @@ The repository consists of the following files:
  - `arakelov.sage` - implementation of Arakelov random walk from [dBDPMW20]
  - `lllbkz_modfalcon.sage, lllbkz_ntru.sage` - fpylll reduction for NTRU and ModFalcon.
  - `pump.py` - bkz with sieving.
+ - `algered.sage` - comparison of AZGSA with the experimental data.
 
 [BEF+17] - Jean-François. Biasse, Thomas Espitau, Pierre-Alain Fouque, Alexandre
 G´elin, and Paul Kirchner. Computing generator in cyclotomic integer

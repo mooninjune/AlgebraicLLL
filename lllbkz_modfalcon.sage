@@ -240,9 +240,10 @@ def run_experiment( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
 
 path = "lllbkz_folder/"
 isExist = os.path.exists(path)
-if not isExist:
-   # Create a new directory because it does not exist
-   os.makedirs(path)
+try:
+    os.makedirs(path)
+except:
+    pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
 
 nthreads = 40
 tests_per_q = 20 #

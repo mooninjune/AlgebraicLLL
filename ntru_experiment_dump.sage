@@ -196,102 +196,104 @@ def process_output( output ):
 
     time.sleep( float(0.02) )  #give a time for the program to dump everything to the disc
 
-path = "ntruexp_folder/"
-isExist = os.path.exists(path)
-if not isExist:
-    try:
-        os.makedirs(path)
-    except:
-        pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
+if __name__ == "__main__":
 
-nthreads = 8
-tests_per_q = 3
-dump_public_key = False
+    path = "ntruexp_folder/"
+    isExist = os.path.exists(path)
+    if not isExist:
+        try:
+            os.makedirs(path)
+        except:
+            pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
 
-descend_number = 0
-manual_descend = 1
-early_abort_niters = False
+    nthreads = 8
+    tests_per_q = 3
+    dump_public_key = False
 
-# - - - NTRU 128
+    descend_number = 0
+    manual_descend = 1
+    early_abort_niters = False
 
-f=64
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [10.2+i*0.7 for i in range(3)] ] * tests_per_q
-beta=22
-first_block_beta = 20
+    # - - - NTRU 128
 
-output = []
-pool = Pool(processes = nthreads )
-tasks = []
+    f=64
+    qs = [ next_prime( ceil(2^tmp) ) for tmp in [10.2+i*0.7 for i in range(3)] ] * tests_per_q
+    beta=22
+    first_block_beta = 20
 
-i=0
-init_seed = 0
-print( f"Launching {len(qs)} experiments on {nthreads} threads." )
-print( f"f={f}, qs={qs}, beta={beta}" )
-for q in qs:
-    tasks.append( pool.apply_async(
-    ntru_experiment, (f,q,beta,descend_number,init_seed,manual_descend,dump_public_key, first_block_beta, early_abort_niters)
-    ) )
-    init_seed += 1
+    output = []
+    pool = Pool(processes = nthreads )
+    tasks = []
 
-for t in tasks:
-    output.append( t.get() )
+    i=0
+    init_seed = 0
+    print( f"Launching {len(qs)} experiments on {nthreads} threads." )
+    print( f"f={f}, qs={qs}, beta={beta}" )
+    for q in qs:
+        tasks.append( pool.apply_async(
+        ntru_experiment, (f,q,beta,descend_number,init_seed,manual_descend,dump_public_key, first_block_beta, early_abort_niters)
+        ) )
+        init_seed += 1
 
-pool.close() #closing processes in order to avoid crashing
-process_output( output )
+    for t in tasks:
+        output.append( t.get() )
 
-print("NTRU 128 Done")
-# - - - NTRU 256
-#
-# f=256
-# qs = [ next_prime( ceil(2^tmp) ) for tmp in [13.0+i*0.1 for i in range(6)] ] * tests_per_q
-# beta=40
-# first_block_beta = 46
-#
-# output = []
-# pool = Pool(processes = nthreads )
-# tasks = []
-#
-# i=0
-# init_seed = 0
-# print( f"Launching {len(qs)} experiments on {nthreads} threads." )
-# print( f"f={f}, qs={qs}, beta={beta}" )
-# for q in qs:
-#     tasks.append( pool.apply_async(
-#     ntru_experiment, (f,q,beta,descend_number,init_seed,manual_descend,dump_public_key, first_block_beta, early_abort_niters)
-#     ) )
-#     init_seed += 1
-#
-# for t in tasks:
-#     output.append( t.get() )
-#
-# pool.close() #closing processes in order to avoid crashing
-# process_output( output )
-# print("NTRU 256 Done")
-#
-# # - - - NTRU 512
-#
-# f=512
-# qs = [ next_prime( ceil(2^tmp) ) for tmp in [17.0 + 0.4*i for i in range(6)] ] * tests_per_q
-# beta= 40
-# first_block_beta = 50
-#
-# output = []
-# pool = Pool(processes = nthreads )
-# tasks = []
-#
-# i=0
-# init_seed = 0
-# print( f"Launching {len(qs)} experiments on {nthreads} threads." )
-# print( f"f={f}, qs={qs}, beta={beta}" )
-# for q in qs:
-#     tasks.append( pool.apply_async(
-#     ntru_experiment, (f,q,beta,descend_number,init_seed,manual_descend,dump_public_key, first_block_beta, early_abort_niters)
-#     ) )
-#     init_seed += 1
-#
-# for t in tasks:
-#     output.append( t.get() )
-#
-# pool.close() #closing processes in order to avoid crashing
-# process_output( output )
-# print("NTRU 512 Done")
+    pool.close() #closing processes in order to avoid crashing
+    process_output( output )
+
+    print("NTRU 128 Done")
+    # - - - NTRU 256
+    #
+    # f=256
+    # qs = [ next_prime( ceil(2^tmp) ) for tmp in [13.0+i*0.1 for i in range(6)] ] * tests_per_q
+    # beta=40
+    # first_block_beta = 46
+    #
+    # output = []
+    # pool = Pool(processes = nthreads )
+    # tasks = []
+    #
+    # i=0
+    # init_seed = 0
+    # print( f"Launching {len(qs)} experiments on {nthreads} threads." )
+    # print( f"f={f}, qs={qs}, beta={beta}" )
+    # for q in qs:
+    #     tasks.append( pool.apply_async(
+    #     ntru_experiment, (f,q,beta,descend_number,init_seed,manual_descend,dump_public_key, first_block_beta, early_abort_niters)
+    #     ) )
+    #     init_seed += 1
+    #
+    # for t in tasks:
+    #     output.append( t.get() )
+    #
+    # pool.close() #closing processes in order to avoid crashing
+    # process_output( output )
+    # print("NTRU 256 Done")
+    #
+    # # - - - NTRU 512
+    #
+    # f=512
+    # qs = [ next_prime( ceil(2^tmp) ) for tmp in [17.0 + 0.4*i for i in range(6)] ] * tests_per_q
+    # beta= 40
+    # first_block_beta = 50
+    #
+    # output = []
+    # pool = Pool(processes = nthreads )
+    # tasks = []
+    #
+    # i=0
+    # init_seed = 0
+    # print( f"Launching {len(qs)} experiments on {nthreads} threads." )
+    # print( f"f={f}, qs={qs}, beta={beta}" )
+    # for q in qs:
+    #     tasks.append( pool.apply_async(
+    #     ntru_experiment, (f,q,beta,descend_number,init_seed,manual_descend,dump_public_key, first_block_beta, early_abort_niters)
+    #     ) )
+    #     init_seed += 1
+    #
+    # for t in tasks:
+    #     output.append( t.get() )
+    #
+    # pool.close() #closing processes in order to avoid crashing
+    # process_output( output )
+    # print("NTRU 512 Done")

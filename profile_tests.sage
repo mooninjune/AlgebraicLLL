@@ -27,9 +27,10 @@ import pickle
 def run_experiment_LWE( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
     path = "profile_folder/"
     isExist = os.path.exists(path)
-    if not isExist:
-       # Create a new directory because it does not exist
-       os.makedirs(path)
+    try:
+        os.makedirs(path)
+    except:
+        pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
 
     B = gen_LWE( f,q,k,seed=seed )
 
@@ -93,7 +94,7 @@ def run_experiment_LWE( f=256,q=next_prime(ceil(2^16.98)),k=2, beta=4, seed=0 ):
         print( e )
         return None
 
-def process_output( output, expnum ):
+def process_output( output, expnum, f ):
     d = {}
     for o in output:
         if o is None:
@@ -122,89 +123,90 @@ def process_output( output, expnum ):
 
     time.sleep( float(0.1) )
 
+if __name__ == "__main__":
 
-nthreads = 6
-tests_per_q = 5
-dump_public_key = False
+    nthreads = 6
+    tests_per_q = 5
+    dump_public_key = False
 
-# - - - f=small
+    # - - - f=small
 
-f=32
-k=6
-qs = [ next_prime( ceil(2^tmp) ) for tmp in [12,14,16] ] * tests_per_q
-beta=35
+    f=32
+    k=6
+    qs = [ next_prime( ceil(2^tmp) ) for tmp in [12,14,16] ] * tests_per_q
+    beta=35
 
-output = []
-pool = Pool(processes = nthreads )
-tasks = []
+    output = []
+    pool = Pool(processes = nthreads )
+    tasks = []
 
-i=0
-init_seed = 0
-print( f"Launching {len(qs)} experiments on {nthreads} threads." )
-print( f"f={f}, k={k} qs={qs}, beta={beta}" )
-for q in qs:
-    tasks.append( pool.apply_async(
-    run_experiment_LWE, (f,q,k, beta, init_seed)
-    ) )
-    init_seed += 1
+    i=0
+    init_seed = 0
+    print( f"Launching {len(qs)} experiments on {nthreads} threads." )
+    print( f"f={f}, k={k} qs={qs}, beta={beta}" )
+    for q in qs:
+        tasks.append( pool.apply_async(
+        run_experiment_LWE, (f,q,k, beta, init_seed)
+        ) )
+        init_seed += 1
 
-for t in tasks:
-    output.append( t.get() )
+    for t in tasks:
+        output.append( t.get() )
 
-pool.close() #closing processes in order to avoid crashing
-process_output( output, tests_per_q )
+    pool.close() #closing processes in order to avoid crashing
+    process_output( output, tests_per_q, f )
 
-# --- f=64
-#
-# f=64
-# k=6
-# qs = [ next_prime( ceil(2^tmp) ) for tmp in [32,48,64] ] * tests_per_q
-# beta=35
-#
-# output = []
-# pool = Pool(processes = nthreads )
-# tasks = []
-#
-# i=0
-# init_seed = 0
-# print( f"Launching {len(qs)} experiments on {nthreads} threads." )
-# print( f"f={f}, k={k} qs={qs}, beta={beta}" )
-# for q in qs:
-#     tasks.append( pool.apply_async(
-#     run_experiment_LWE, (f,q,k, beta, init_seed)
-#     ) )
-#     init_seed += 1
-#
-# for t in tasks:
-#     output.append( t.get() )
-#
-# pool.close() #closing processes in order to avoid crashing
-# process_output( output, tests_per_q )
+    # --- f=64
+    #
+    # f=64
+    # k=6
+    # qs = [ next_prime( ceil(2^tmp) ) for tmp in [32,48,64] ] * tests_per_q
+    # beta=35
+    #
+    # output = []
+    # pool = Pool(processes = nthreads )
+    # tasks = []
+    #
+    # i=0
+    # init_seed = 0
+    # print( f"Launching {len(qs)} experiments on {nthreads} threads." )
+    # print( f"f={f}, k={k} qs={qs}, beta={beta}" )
+    # for q in qs:
+    #     tasks.append( pool.apply_async(
+    #     run_experiment_LWE, (f,q,k, beta, init_seed)
+    #     ) )
+    #     init_seed += 1
+    #
+    # for t in tasks:
+    #     output.append( t.get() )
+    #
+    # pool.close() #closing processes in order to avoid crashing
+    # process_output( output, tests_per_q, f )
 
 
-# --- f=128
+    # --- f=128
 
-# f=128
-# k=4
-# qs = [ next_prime( ceil(2^tmp) ) for tmp in [25,27.5,30] ] * tests_per_q
-# beta=35
-#
-# output = []
-# pool = Pool(processes = nthreads )
-# tasks = []
-#
-# i=0
-# init_seed = 0
-# print( f"Launching {len(qs)} experiments on {nthreads} threads." )
-# print( f"f={f}, k={k} qs={qs}, beta={beta}" )
-# for q in qs:
-#     tasks.append( pool.apply_async(
-#     run_experiment_LWE, (f,q,k, beta, init_seed)
-#     ) )
-#     init_seed += 1
-#
-# for t in tasks:
-#     output.append( t.get() )
-#
-# pool.close() #closing processes in order to avoid crashing
-# process_output( output, tests_per_q )
+    # f=128
+    # k=4
+    # qs = [ next_prime( ceil(2^tmp) ) for tmp in [25,27.5,30] ] * tests_per_q
+    # beta=35
+    #
+    # output = []
+    # pool = Pool(processes = nthreads )
+    # tasks = []
+    #
+    # i=0
+    # init_seed = 0
+    # print( f"Launching {len(qs)} experiments on {nthreads} threads." )
+    # print( f"f={f}, k={k} qs={qs}, beta={beta}" )
+    # for q in qs:
+    #     tasks.append( pool.apply_async(
+    #     run_experiment_LWE, (f,q,k, beta, init_seed)
+    #     ) )
+    #     init_seed += 1
+    #
+    # for t in tasks:
+    #     output.append( t.get() )
+    #
+    # pool.close() #closing processes in order to avoid crashing
+    # process_output( output, tests_per_q, f )
