@@ -1,4 +1,4 @@
-# Practical Algebraic LLL Reduction Algorithm For Free Modules over Cyclotomic Fields of Power-of-two Conductor
+# Finding Dense Submodules with Algebraic Lattice Reduction
 This repository contains the framework that reduces algebraic lattices defined over power-of-2 cyclotomic fields. It contains the implementation of an algebraic LLL algorithm described in the article "**Finding Dense Submodules with Algebraic Lattice Reduction**" - Alexander Karenin and Elena Kirshanova.
 ## Acknowledgment
 Both authors are affiliated with:
@@ -61,16 +61,16 @@ The result will be stored in `B_red`.
 # Experiments
 To run the experiments from Section 5.1, type:
 
-    > sage profile_tests.sage
+     sage profile_tests.sage
 To run the experiments from Section 5.2, type:
 
-    > sage ntru_experiment_dump.sage
+     sage ntru_experiment_dump.sage
 To run the experiments from Section 5.3, type:
 
-    > sage modfalcon_experiment.sage
+     sage modfalcon_experiment.sage
 
 To run the experiments from Section 5.4, type:
 
-    > sage idealtest.sage
+     sage idealtest.sage
 
 To get the runtimes of FPYLLL on ModFalcon and NTRU lattices, run files `lllbkz_modfalcon.sage` and `lllbkz_ntru.sage` respectively.
