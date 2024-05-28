@@ -146,6 +146,7 @@ def lll_fft(
 
         if not good_blocks[i] and verbose:
             print(f"{bcolors.WARNING}BKZ at block {i,i+1} has already been called and the block isn't randomized. Skipping!{bcolors.ENDC}")
+            G.compute_GSO(start=i, end=i+2)
         if log_t0>=log_t1_ and good_blocks[i]:  #if anti-Lovasz is triggered and the block is 'good', we call SVP
             G.unit_reduce(FI,B,U, start=i+1, end=i+2,debug=debug)
             G.size_reduce(FI,B,U, start=i+1, end=i+2,debug=debug)
@@ -230,10 +231,6 @@ def lll_fft(
                             print(f"Launching pip on gcd={gcdss}, N(a)={ns0}, N(b)={ns1}")
                             stdout.flush()
                             g = pip_solver( s0,s1 )  #solving pip
-                            # gg = nf_elem( minkowski_embedding(g) )
-                            # g *= gg.get_close_unit(FI,for_sqrt=False).to_number_field_round(K) #shortening the generator
-                            # nerr = pari("norm_err")
-                            #print(f"DEBUG: N(g/answer)={nerr}") #printing debug info
 
                             s0, s1 = s0/g, s1/g
                             ns0, ns1 = norm(s0),norm(s1)

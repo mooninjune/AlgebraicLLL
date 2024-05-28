@@ -464,14 +464,16 @@ class GSO_obj: #checked
                     gii = [self.G[kappa][i] for kappa in range(i+1,n)]
                     gij, gjj, gji = self.G[i][j], self.G[j][j], self.G[i][j].conjugate()
                     for kappa in range(i):
-                        gi[kappa] -=  delta_nf*self.G[j][kappa] if j>=kappa else delta_nf*self.G[kappa][j].conjugate()
+                        #gi[kappa] -=  delta_nf*self.G[j][kappa] if j>=kappa else delta_nf*self.G[kappa][j].conjugate()
+                        self.G[i][kappa] -=  delta_nf*self.G[j][kappa] if j>=kappa else delta_nf*self.G[kappa][j].conjugate()
                     for kappa in range(i+1,n):
-                        gii[kappa-i-1] -=  dnf*self.G[kappa][j] if j<=kappa else dnf*self.G[j][kappa].conjugate()
+                        #gii[kappa-i-1] -=  dnf*self.G[kappa][j] if j<=kappa else dnf*self.G[j][kappa].conjugate()
+                        self.G[kappa][i] -=  dnf*self.G[kappa][j] if j<=kappa else dnf*self.G[j][kappa].conjugate()
                     self.G[i][i] -= ( delta_nf*gji+dnf*gij-delta_nf*dnf*gjj )
-                    for kappa in range(i):
-                        self.G[i][kappa] = gi[kappa]
-                    for kappa in range(i+1,n):
-                        self.G[kappa][i] = gii[kappa-i-1]
+                    #for kappa in range(i):
+                    #    self.G[i][kappa] = gi[kappa]
+                    #for kappa in range(i+1,n):
+                    #    self.G[kappa][i] = gii[kappa-i-1]
                     U[i] -= delta_nf*U[j]
                     B[i] -= delta_nf*B[j]
                     self.compute_GSO( start=i, end=i+1 )

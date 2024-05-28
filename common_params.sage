@@ -42,7 +42,7 @@ class global_variables:
     mpfr_usage_threshold_prec = 144      #minimal precision to start using mpfr
     mpfr_usage_threshold_dim = 385      #minimal dimension to start using mpfr
     ld_usage_threshold_prec = 80       #maximal precision for using ld
-    ld_usage_threshold_dim = 256 #128        #maximal dimension for using ld
+    ld_usage_threshold_dim = 128 #128        #maximal dimension for using ld
 
     bkz_max_loops = 2                  #amount of tours in BKZ algorithm called during algebraic LLL
     parisizemax = 6442713088            #amount of memory allocated by pari gp (in Bytes)

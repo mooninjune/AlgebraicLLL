@@ -49,7 +49,7 @@ def embed_Q(B, scale_for_bkz=True):
 
     M = matrix.block(M)
     if scale_for_bkz:
-        ceiling = log(max( [abs(t) for t in M.coefficients()]).n(), 2 )
+        ceiling = log(RR(max( [abs(t) for t in M.coefficients()])), 2 )
         p = max( 0, ceil((ceiling-global_variables.bkz_scaling_factor)) )
 
         for i in range(M.nrows()):
@@ -172,7 +172,7 @@ def canonical_embedding_for_fpylll(M_):
       [ round(b) for b in bb ] for bb in M
     ])
 
-    ceiling = log(max( [abs(t) for t in M.coefficients()]).n(), 2 )
+    ceiling = log(RR(max( [abs(t) for t in M.coefficients()])), 2 )
     p = max( 0, ceil((ceiling-global_variables.bkz_scaling_factor)) )
 
     for i in range(M.nrows()):

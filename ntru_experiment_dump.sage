@@ -106,6 +106,7 @@ def ntru_experiment( f=512,q=next_prime(ceil(2^16.98)),beta=40,descend_number=0,
                 strat["rho"] = early_abort_niters
                 strat["rho_sub"] = 12
                 strat["debug"] = debug_flags.verbose_anomalies#|debug_flags.dump_gcdbad
+                strat["use_pip_solver"] = False
                 LLL = L2( B,strat )     #LLL reducing
 
                 print(f"Running full LLL... with descend num:", strat["descend_number"])
@@ -206,8 +207,8 @@ if __name__ == "__main__":
         except:
             pass    #still in docker if isExists==False, for some reason folder can exist and this will throw an exception.
 
-    nthreads = 8
-    tests_per_q = 3
+    nthreads = 16
+    tests_per_q = 10
     dump_public_key = False
 
     descend_number = 0
@@ -216,10 +217,10 @@ if __name__ == "__main__":
 
     # - - - NTRU 128
 
-    f=64
-    qs = [ next_prime( ceil(2^tmp) ) for tmp in [10.2+i*0.7 for i in range(3)] ] * tests_per_q
-    beta=22
-    first_block_beta = 20
+    f=512
+    qs = [ next_prime( ceil(2^tmp) ) for tmp in [16.4+i*0.2 for i in range(4)] ] * tests_per_q
+    beta=40
+    first_block_beta = 47
 
     output = []
     pool = Pool(processes = nthreads )

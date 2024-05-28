@@ -199,7 +199,7 @@ def bkz_reduce(B, block_size, verbose=False, task_id=None, sort=True, bkz_r00_ab
 
     T = GSO.Mat(B, float_type="ld")
     T.update_gso()
-    init_r00 = (log(T.get_r(0,0),2)/2).n()
+    init_r00 = RR(log(T.get_r(0,0),2)/2)
     print(f"Invoking flatter... r00={init_r00}")
     then = time.perf_counter()
     BB = flatter_interface(B)
