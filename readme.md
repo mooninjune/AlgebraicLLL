@@ -1,5 +1,5 @@
 # Finding Dense Submodules with Algebraic Lattice Reduction
-This repository contains the framework that reduces algebraic lattices defined over power-of-2 cyclotomic fields. It contains the implementation of an algebraic LLL algorithm described in the article "**Finding Dense Submodules with Algebraic Lattice Reduction**" - Alexander Karenin and Elena Kirshanova.
+This repository contains the framework that reduces algebraic lattices defined over power-of-2 cyclotomic fields. It contains the implementation of an algebraic LLL algorithm described in the article "**Finding Dense Submodules with Algebraic Lattice Reduction**" - Alexander Karenin and Elena Kirshanova ([full version](https://eprint.iacr.org/2024/844)).
 ## Acknowledgment
 Both authors are affiliated with:
 - Cryptography Research Center, Technology Innovation Institute, Abu Dhabi, UAE
